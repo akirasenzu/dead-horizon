@@ -60,7 +60,7 @@ export function createSurvivalWorld({catalog,clothes,ammunition,mods,compatibleM
   const moving=now-p.inputAt<500&&(p.input.x||p.input.z),sprinting=moving&&p.input.sprint&&!p.seated&&p.stamina>5;
   p.hunger=Math.max(0,p.hunger-dt*.035*(p.traits.includes('lightEater')?.7:p.traits.includes('hungry')?1.4:1));
   p.thirst=Math.max(0,p.thirst-dt*.055*(p.traits.includes('thirsty')?1.5:1)*(sprinting?1.6:1));
-  p.stamina=Math.max(0,Math.min(100,p.stamina+dt*(sprinting?-(p.traits.includes('fit')?5:8):moving?1.5:8)));
+  p.stamina=Math.max(0,Math.min(100,p.stamina+dt*(sprinting?-(p.traits.includes('fit')?5:8):(moving?1.5:8)*(p.traits.includes('fit')?1.3:1)*(p.profession==='scout'?1.2:1))));
   p.fatigue=Math.max(0,Math.min(100,p.fatigue+dt*(p.resting&&!moving?-1:.009)));
   if(!p.hunger||!p.thirst)p.hp=Math.max(0,p.hp-dt*(!p.thirst?.6:.3));
   if(p.bleeding)p.hp=Math.max(0,p.hp-dt*p.bleeding*.015);
