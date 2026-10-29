@@ -10,13 +10,13 @@
     "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
   },
   {
-    "path": "web/game/hazebrouck-map.json",
-    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/game/hazebrouck-map.json",
-    "sha256": "d960de112026f9674ac1775a52fb4112b8f787befec560c17493a85275596c4a"
+    "path": "web/game/world-map.json",
+    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/game/world-map.json",
+    "sha256": "8848c01e9f7508728ac3dfb830615b28def1ac68c4891feda79d49c419cc1c63"
   },
   {
-    "path": "web/assets/hazebrouck.png",
-    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/assets/hazebrouck.png",
+    "path": "web/assets/city.png",
+    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/assets/city.png",
     "sha256": "efca3f429ac9c9f057de11ca8429d9ae090d2f0954cd023c24643a5837fc88e9"
   },
   {

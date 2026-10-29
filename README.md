@@ -1,4 +1,4 @@
-# Dead Horizon — Hazebrouck en ligne
+# Dead Horizon — Survie en ligne
 
 Dead Horizon remplace l’ancien projet Dead County dans ce dépôt. L’historique Git conserve les anciennes versions.
 
@@ -8,7 +8,7 @@ Dead Horizon remplace l’ancien projet Dead County dans ce dépôt. L’histori
 
 ## Jouer
 
-Téléchargez `DeadHorizon.exe`, ouvrez le lanceur, connectez-vous à votre compte, créez votre personnage puis cliquez sur **Rejoindre le serveur**. Tous les joueurs rejoignent le même monde Hazebrouck, sans code ni salon. Internet est nécessaire pour ce mode ; le solo reste disponible hors connexion.
+Téléchargez `DeadHorizon.exe`, ouvrez le lanceur, connectez-vous à votre compte, créez votre personnage puis cliquez sur **Rejoindre le serveur**. Tous les joueurs rejoignent le même monde la ville, sans code ni salon. Internet est nécessaire pour ce mode ; le solo reste disponible hors connexion.
 
 Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le composant Microsoft WebView2 Evergreen, déjà installé sur la plupart des PC Windows récents. Le lien officiel pour l’installer si nécessaire : https://developer.microsoft.com/microsoft-edge/webview2/.
 

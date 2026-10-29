@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import{prepareCityMap,createHousing,pointInside}from'../web/game/housing.js';
-const raw=JSON.parse(fs.readFileSync('web/game/hazebrouck-map.json')),map=prepareCityMap(raw),h=createHousing(map);
+const raw=JSON.parse(fs.readFileSync('web/game/world-map.json')),map=prepareCityMap(raw),h=createHousing(map);
 test('La mise à l’échelle conserve le plan, les repères et les proportions des rues',()=>{assert.equal(prepareCityMap(map),map);assert.equal(map.spawn[0],raw.spawn[0]*1.3);assert.equal(map.buildings.length,raw.buildings.length);assert(map.buildings.every(b=>b.h>=3.2));assert.equal(map.roads[4].p[0][0],Math.round(raw.roads[4].p[0][0]*130)/100)});
 test('Toutes les entrées annoncées sont franchissables avec le rayon du personnage',()=>{h.setDoors(Object.fromEntries(h.houses.filter(b=>b.enterable).map(b=>[b.id,true])));assert(h.count>9000);for(const b of h.houses.filter(b=>b.enterable))for(let v=-1;v<2.5;v+=.15)assert(!h.blocked(...b.point(0,v),.55),'Passage obstrué '+b.id+' / '+v);h.setDoors({})});
 test('Une porte fermée bloque les acteurs, une porte ouverte reste interdite aux véhicules',()=>{const b=h.houses.find(b=>b.enterable&&b.furniture.length>=3),d=b.door;assert(h.blocked(d.x,d.z));assert(h.toggleDoor(b));assert(!h.blocked(d.x,d.z));assert(h.blocked(d.x,d.z,1.3,{vehicle:true}));assert(!h.toggleDoor(b,[{x:d.x,z:d.z}]));assert(h.isOpen(b));assert(h.toggleDoor(b));assert(h.blocked(d.x,d.z))});

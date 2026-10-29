@@ -36,7 +36,7 @@ static class Program
                 var hardware = Hardware.Detect(); var assets = Assets.Extract();
                 var config = new Settings(); var roundtrip = JsonSerializer.Deserialize<Settings>(JsonSerializer.Serialize(config, Json), Json)!;
                 var offline = Directory.GetFiles(assets, "*.js", SearchOption.AllDirectories).All(p => !File.ReadAllText(p).Contains("cdn.jsdelivr.net"));
-                File.WriteAllText(args[1], JsonSerializer.Serialize(new { ok = File.Exists(Path.Combine(assets,"hazebrouck-map.json")) && offline && roundtrip.Fps == 60, hardware, assets, offline, webViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString(), presets = new[]{"eco","balanced","high"}.Select(Quality.For) }, Json));
+                File.WriteAllText(args[1], JsonSerializer.Serialize(new { ok = File.Exists(Path.Combine(assets,"world-map.json")) && offline && roundtrip.Fps == 60, hardware, assets, offline, webViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString(), presets = new[]{"eco","balanced","high"}.Select(Quality.For) }, Json));
                 return;
             }
             Application.Run(new Launcher(args.Length == 2 && args[0] == "--smoke-test" ? args[1] : null,args.SequenceEqual(new[]{"--updated"})));
@@ -118,7 +118,7 @@ sealed class Launcher : Form
     {
         smoke=smokePath;Text="Dead Horizon — Lanceur";ClientSize=new Size(960,660);MinimumSize=new Size(850,660);BackColor=Ink;ForeColor=Color.FromArgb(237,236,216);Font=new Font("Segoe UI",10);StartPosition=FormStartPosition.CenterScreen;AutoScaleMode=AutoScaleMode.Dpi;
         var title=LabelAt("DEAD HORIZON",36,28,650,58,32,FontStyle.Bold);Controls.Add(title);Controls.Add(LabelAt("v"+Program.Version.ToString(3),790,50,135,25,11,FontStyle.Regular,Muted));
-        Controls.Add(LabelAt("HAZEBROUCK  /  SERVEUR COMMUN",39,90,740,25,10,FontStyle.Bold,Accent));
+        Controls.Add(LabelAt("MONDE OUVERT  /  SERVEUR COMMUN",39,90,740,25,10,FontStyle.Bold,Accent));
         Controls.Add(LabelAt("Rejoins les autres sur le serveur commun. Le mode solo reste disponible hors connexion.",39,123,840,25,11,FontStyle.Regular,Muted));
         var pcCard=new Panel{Location=new Point(36,172),Size=new Size(430,268),BackColor=PanelColor};Controls.Add(pcCard);
         pcCard.Controls.Add(LabelAt("VOTRE PC",20,17,390,25,10,FontStyle.Bold,Accent));
@@ -179,7 +179,7 @@ sealed class GameWindow : Form
     Rectangle savedBounds;FormWindowState savedState;bool full;
     public GameWindow(string assets,Settings config,Quality profile,string? smokePath)
     {
-        folder=assets;settings=config;quality=profile;smoke=smokePath;Text="Dead Horizon — Hazebrouck";BackColor=Color.FromArgb(17,28,23);StartPosition=FormStartPosition.CenterScreen;MinimumSize=new Size(800,520);
+        folder=assets;settings=config;quality=profile;smoke=smokePath;Text="Dead Horizon — Survie";BackColor=Color.FromArgb(17,28,23);StartPosition=FormStartPosition.CenterScreen;MinimumSize=new Size(800,520);
         var screen=Screen.PrimaryScreen?.WorkingArea??new Rectangle(0,0,1280,720);var dimensions=settings.Resolution.Split('×');int w=1600,h=900;if(dimensions.Length==2){int.TryParse(dimensions[0].Trim(),out w);int.TryParse(dimensions[1].Trim(),out h);}else{w=screen.Width;h=screen.Height;}
         ClientSize=new Size(Math.Clamp(w,800,Math.Max(800,screen.Width-32)),Math.Clamp(h,480,Math.Max(480,screen.Height-80)));Controls.Add(view);
         Shown+=async(_,_)=>await Initialize();FormClosed+=(_,_)=>view.Dispose();

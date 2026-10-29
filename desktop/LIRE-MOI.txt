@@ -1,7 +1,7 @@
 DEAD HORIZON 2.0 — SERVEUR COMMUN
 
 Ouvre DeadHorizon.exe puis clique sur JOUER. Dans le jeu, crée ton compte ou connecte-toi, puis crée ton personnage et choisis REJOINDRE LE SERVEUR.
-Tout le monde se retrouve sur le même serveur Hazebrouck, sans code. Jusqu’à 16 joueurs.
+Tout le monde se retrouve sur le même serveur Dead Horizon, sans code. Jusqu’à 16 joueurs.
 Le serveur est : https://dead-horizon-coop-291026.keentoad34.chatgpt.site/
 
 Le mode solo reste disponible hors connexion. Le multijoueur exige Internet.
