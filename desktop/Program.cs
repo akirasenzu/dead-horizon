@@ -18,13 +18,13 @@ static class Program
     internal static Version Version { get { var v=Assembly.GetExecutingAssembly().GetName().Version!;return new(v.Major,v.Minor,v.Build); } }
     internal static readonly HttpClient UpdateClient = UpdateManager.CreateClient();
     internal static UpdateManager Updates => new(Data,Version,UpdateClient);
-    internal static void StartUpdated(string path) { var start=new ProcessStartInfo(path){UseShellExecute=false,WorkingDirectory=Path.GetDirectoryName(path)!};start.ArgumentList.Add("--updated");_ = Process.Start(start) ?? throw new IOException("Le nouveau lanceur n’a pas pu démarrer."); }
+    internal static void StartUpdated(string path,bool installedNow=true) { var start=new ProcessStartInfo(path){UseShellExecute=false,WorkingDirectory=Path.GetDirectoryName(path)!};if(installedNow)start.ArgumentList.Add("--updated");_ = Process.Start(start) ?? throw new IOException("Le nouveau lanceur n’a pas pu démarrer."); }
     [STAThread]
     static void Main(string[] args)
     {
         Directory.CreateDirectory(Data);
         if(args.Length==0 || args.SequenceEqual(new[]{"--updated"})) {
-            try { var cached=Updates.CachedUpdate();if(cached!=null){StartUpdated(cached.Path);return;} }catch(Exception e){Log("Lancement de la version en cache : "+e.Message);}
+            try { var cached=Updates.CachedUpdate();if(cached!=null){StartUpdated(cached.Path,false);return;} }catch(Exception e){Log("Lancement de la version en cache : "+e.Message);}
         }
         ApplicationConfiguration.Initialize();
         Application.ThreadException += (_, e) => Report(e.Exception);
@@ -138,20 +138,20 @@ sealed class Launcher : Form
         StyleButton(play,"JOUER À DEAD HORIZON  →",36,596,888,44,true);play.Enabled=false;play.Click+=async(_,_)=>await StartGame();Controls.Add(play);
         quality.SelectedIndex=Array.IndexOf(new[]{"auto","eco","balanced","high"},settings.Quality);if(quality.SelectedIndex<0)quality.SelectedIndex=0;
         resolution.SelectedItem=settings.Resolution;if(resolution.SelectedIndex<0)resolution.SelectedIndex=1;fps.SelectedIndex=settings.Fps==30?0:settings.Fps==120?2:settings.Fps==0?3:1;
-        Shown+=async(_,_)=>{await Detect();if(smoke!=null){starting=false;await StartGame();return;}if(justUpdated){starting=false;play.Enabled=true;status.Text="Mise à jour installée · v"+Program.Version.ToString(3)+" · réglages conservés.";}else await CheckUpdates();};
+        Shown+=async(_,_)=>{await Detect();if(smoke!=null){starting=false;await StartGame();return;}await CheckUpdates(justUpdated);};
         FormClosing+=(_,_)=>{shutdown.Cancel();SaveSettings();};
     }
     static Label LabelAt(string text,int x,int y,int w,int h,float size,FontStyle style=FontStyle.Regular,Color? color=null)=>new(){Text=text,Location=new Point(x,y),Size=new Size(w,h),Font=new Font("Segoe UI",size,style),ForeColor=color??Color.FromArgb(237,236,216)};
     static void StyleButton(Button b,string text,int x,int y,int w,int h,bool primary){b.Text=text;b.Location=new Point(x,y);b.Size=new Size(w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=primary?Accent:Color.FromArgb(78,100,82);b.BackColor=primary?Accent:PanelColor;b.ForeColor=primary?Ink:Color.FromArgb(237,236,216);b.Font=new Font("Segoe UI",10,FontStyle.Bold);b.Cursor=Cursors.Hand;}
     static void AddCombo(Panel parent,string title,ComboBox box,int y,string[] items){parent.Controls.Add(LabelAt(title,20,y,390,22,9,FontStyle.Regular,Muted));box.Location=new Point(20,y+25);box.Size=new Size(390,30);box.DropDownStyle=ComboBoxStyle.DropDownList;box.Items.AddRange(items);box.BackColor=Ink;box.ForeColor=Color.FromArgb(237,236,216);parent.Controls.Add(box);}
     async Task Detect(){detect.Enabled=false;play.Enabled=false;try{hardware=await Task.Run(Hardware.Detect);pc.Text=$"{hardware.Cpu}\n{hardware.Threads} processeurs logiques · {hardware.RamGb:0.#} Go de mémoire\n\n{hardware.Gpu}";recommendation.Text="Profil conseillé : "+Quality.For(hardware.Recommended).Name;status.Text="Matériel détecté. La qualité automatique s’adapte aussi pendant la partie.";}catch(Exception e){hardware=new("Processeur Windows",Environment.ProcessorCount,0,"Détection partielle",0,false,"eco");pc.Text="Détection partielle. Le profil économique reste disponible.";Program.Log(e.Message);}finally{detect.Enabled=true;play.Enabled=!starting&&!checkingUpdate;}}
-    async Task CheckUpdates()
+    async Task CheckUpdates(bool installedNow=false)
     {
         if(checkingUpdate)return;checkingUpdate=true;play.Enabled=false;detect.Enabled=false;retryUpdate.Visible=false;updateProgress.Visible=true;updateProgress.Value=0;
         try {
             var progress=new Progress<(string Text,int Percent)>(p=>{if(!IsDisposed){status.Text=p.Text;updateProgress.Value=Math.Clamp(p.Percent,0,100);}});
             var result=await Program.Updates.PrepareAsync(progress,shutdown.Token);if(IsDisposed||shutdown.IsCancellationRequested)return;
-            status.Text=result.Message;retryUpdate.Visible=result.Retry;
+            status.Text=installedNow&&result.Update==null&&!result.Retry?"Version v"+Program.Version.ToString(3)+" à jour · réglages conservés.":result.Message;retryUpdate.Visible=result.Retry;
             if(result.Update is { } update){SaveSettings();Program.StartUpdated(update.Path);try{Program.Updates.Activate(update);}catch(Exception e){Program.Log("Mémorisation de la mise à jour : "+e.Message);}Close();return;}
         }catch(OperationCanceledException)when(shutdown.IsCancellationRequested){}
         catch(Exception e){Program.Log("Mise à jour : "+e.Message);if(!IsDisposed){status.Text="La version installée reste disponible. Réessaie la mise à jour plus tard.";retryUpdate.Visible=true;}}

@@ -34,6 +34,13 @@ try
     using(var locked=new FileStream(Path.Combine(root,"Updates","download.lock"),FileMode.OpenOrCreate,FileAccess.ReadWrite,FileShare.None)){Check((await manager.PrepareAsync(null)).Retry,"Two launchers must not download into the cache concurrently");}
     File.WriteAllBytes(update.Update.Path,new byte[bytes.Length]);Check(manager.CachedUpdate()==null,"Tampered/corrupted cached executable must not be launched");
     bool activated=false;try{manager.Activate(update.Update);activated=true;}catch(InvalidDataException){}Check(!activated,"Activation must recheck integrity");
+    var secondHop=Manager(root,r=>r.RequestUri!.AbsoluteUri==UpdateManager.Feed?Json(Manifest("2.2.10")):Binary(bytes),"2.2.9");
+    var second=await secondHop.PrepareAsync(null);Check(second.Update?.Version==new Version(2,2,10),"An already updated launcher must discover the next release");secondHop.Activate(second.Update!);
+    Check(manager.CachedUpdate()?.Version==new Version(2,2,10),"The original bootstrap must follow the second installed update");
+    int lookups=0;var nextStartup=Manager(root,r=>{lookups++;return Json(Manifest("2.2.10"));},"2.2.10");await nextStartup.PrepareAsync(null);Check(lookups==1,"The installed launcher must keep checking on later startups");
+    var interrupted=Manager(root,r=>r.RequestUri!.AbsoluteUri==UpdateManager.Feed?Json(Manifest("2.2.11")):new HttpResponseMessage(HttpStatusCode.OK){Content=new StreamContent(new InterruptedStream(bytes))},"2.2.10");
+    Check((await interrupted.PrepareAsync(null)).Retry,"An interrupted network stream must return a usable installed launcher");Check(manager.CachedUpdate()?.Version==new Version(2,2,10),"An interrupted second download must preserve the last activated release");
+    Check(!Directory.EnumerateFiles(root,"*.part",SearchOption.AllDirectories).Any(),"Interrupted temporary downloads must be removed");
     Console.WriteLine($"{passed} updater checks passed: download, integrity, activation, offline, interruption, cancellation, locking and rollback protection.");
 }
 finally { var expectedPrefix=Path.Combine(Path.GetFullPath(Path.GetTempPath()),"DeadHorizon-update-tests-");if(!Path.GetFullPath(root).StartsWith(expectedPrefix,StringComparison.OrdinalIgnoreCase))throw new IOException("Unexpected test cleanup path");Directory.Delete(root,true); }
@@ -41,4 +48,9 @@ finally { var expectedPrefix=Path.Combine(Path.GetFullPath(Path.GetTempPath()),"
 sealed class FixtureHandler(Func<HttpRequestMessage,HttpResponseMessage> response) : HttpMessageHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken cancellationToken){cancellationToken.ThrowIfCancellationRequested();return Task.FromResult(response(request));}
+}
+sealed class InterruptedStream(byte[] bytes) : MemoryStream(bytes)
+{
+    bool started;
+    public override ValueTask<int> ReadAsync(Memory<byte> buffer,CancellationToken cancellationToken=default){if(started)throw new IOException("Connection interrupted");started=true;return base.ReadAsync(buffer[..Math.Min(4096,buffer.Length)],cancellationToken);}
 }
