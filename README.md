@@ -76,7 +76,7 @@ Three.js : MIT — voir le fichier récupéré `web/game/vendor/THREE-LICENSE.tx
 
 .NET : https://github.com/dotnet/runtime/blob/main/LICENSE.TXT. Microsoft WebView2 : licence Microsoft dans son paquet NuGet officiel.
 
-Les bâtiments, véhicules et équipements sont des modèles procéduraux simplifiés. Projet indépendant, sans affiliation aux jeux ou auteurs de mods évoqués pendant sa conception.
+Les bâtiments, véhicules et équipements sont des modèles procéduraux simplifiés.
 
 ## Mises à jour automatiques du lanceur (2.2+)
 
