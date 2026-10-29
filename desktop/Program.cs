@@ -15,10 +15,17 @@ static class Program
 {
     public static readonly string Data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DeadHorizon");
     public static readonly JsonSerializerOptions Json = new() { WriteIndented = true, PropertyNameCaseInsensitive = true };
+    internal static Version Version { get { var v=Assembly.GetExecutingAssembly().GetName().Version!;return new(v.Major,v.Minor,v.Build); } }
+    internal static readonly HttpClient UpdateClient = UpdateManager.CreateClient();
+    internal static UpdateManager Updates => new(Data,Version,UpdateClient);
+    internal static void StartUpdated(string path) { var start=new ProcessStartInfo(path){UseShellExecute=false,WorkingDirectory=Path.GetDirectoryName(path)!};start.ArgumentList.Add("--updated");_ = Process.Start(start) ?? throw new IOException("Le nouveau lanceur n’a pas pu démarrer."); }
     [STAThread]
     static void Main(string[] args)
     {
         Directory.CreateDirectory(Data);
+        if(args.Length==0 || args.SequenceEqual(new[]{"--updated"})) {
+            try { var cached=Updates.CachedUpdate();if(cached!=null){StartUpdated(cached.Path);return;} }catch(Exception e){Log("Lancement de la version en cache : "+e.Message);}
+        }
         ApplicationConfiguration.Initialize();
         Application.ThreadException += (_, e) => Report(e.Exception);
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Log(e.ExceptionObject.ToString() ?? "Erreur inconnue");
@@ -32,7 +39,7 @@ static class Program
                 File.WriteAllText(args[1], JsonSerializer.Serialize(new { ok = File.Exists(Path.Combine(assets,"hazebrouck-map.json")) && offline && roundtrip.Fps == 60, hardware, assets, offline, webViewVersion = CoreWebView2Environment.GetAvailableBrowserVersionString(), presets = new[]{"eco","balanced","high"}.Select(Quality.For) }, Json));
                 return;
             }
-            Application.Run(new Launcher(args.Length == 2 && args[0] == "--smoke-test" ? args[1] : null));
+            Application.Run(new Launcher(args.Length == 2 && args[0] == "--smoke-test" ? args[1] : null,args.SequenceEqual(new[]{"--updated"})));
         }
         catch (Exception e) { Report(e); }
     }
@@ -104,12 +111,13 @@ sealed class Launcher : Form
 {
     static readonly Color Ink=Color.FromArgb(17,28,23), PanelColor=Color.FromArgb(26,42,34), Muted=Color.FromArgb(169,185,163), Accent=Color.FromArgb(241,154,89);
     readonly ComboBox quality=new(),resolution=new(),fps=new(); readonly CheckBox fullscreen=new();
-    readonly Label pc=new(),recommendation=new(),status=new(); readonly Button play=new(),detect=new();
+    readonly Label pc=new(),recommendation=new(),status=new(); readonly Button play=new(),detect=new(),retryUpdate=new();
+    readonly ProgressBar updateProgress=new();readonly CancellationTokenSource shutdown=new();bool starting=true,checkingUpdate;
     Hardware? hardware; readonly Settings settings=Settings.Load(); readonly string? smoke;
-    public Launcher(string? smokePath)
+    public Launcher(string? smokePath,bool justUpdated=false)
     {
         smoke=smokePath;Text="Dead Horizon — Lanceur";ClientSize=new Size(960,660);MinimumSize=new Size(850,660);BackColor=Ink;ForeColor=Color.FromArgb(237,236,216);Font=new Font("Segoe UI",10);StartPosition=FormStartPosition.CenterScreen;AutoScaleMode=AutoScaleMode.Dpi;
-        var title=LabelAt("DEAD HORIZON",36,28,650,58,32,FontStyle.Bold);Controls.Add(title);
+        var title=LabelAt("DEAD HORIZON",36,28,650,58,32,FontStyle.Bold);Controls.Add(title);Controls.Add(LabelAt("v"+Program.Version.ToString(3),790,50,135,25,11,FontStyle.Regular,Muted));
         Controls.Add(LabelAt("HAZEBROUCK  /  SERVEUR COMMUN",39,90,740,25,10,FontStyle.Bold,Accent));
         Controls.Add(LabelAt("Rejoins les autres sur le serveur commun. Le mode solo reste disponible hors connexion.",39,123,840,25,11,FontStyle.Regular,Muted));
         var pcCard=new Panel{Location=new Point(36,172),Size=new Size(430,268),BackColor=PanelColor};Controls.Add(pcCard);
@@ -124,17 +132,31 @@ sealed class Launcher : Form
         AddCombo(config,"Images par seconde",fps,200,new[]{"30","60","120","Sans limite"});
         fullscreen.Text="Plein écran sans bordure";fullscreen.Location=new Point(20,289);fullscreen.Size=new Size(390,32);fullscreen.Checked=settings.Fullscreen;config.Controls.Add(fullscreen);
         Controls.Add(LabelAt("F5 : vue · I : inventaire · M : carte\nF11 / Alt + Entrée : plein écran · Alt + F4 : quitter le jeu",39,459,425,62,10,FontStyle.Regular,Muted));
-        status.Location=new Point(38,555);status.Size=new Size(860,28);status.ForeColor=Muted;status.Text="Réglages enregistrés uniquement sur ce PC.";Controls.Add(status);
+        status.Location=new Point(38,555);status.Size=new Size(670,34);status.AutoEllipsis=true;status.ForeColor=Muted;status.Text="Réglages enregistrés uniquement sur ce PC.";Controls.Add(status);
+        updateProgress.Location=new Point(38,540);updateProgress.Size=new Size(884,5);updateProgress.Visible=false;Controls.Add(updateProgress);
+        StyleButton(retryUpdate,"RÉESSAYER LA MISE À JOUR",716,553,208,33,false);retryUpdate.Font=new Font("Segoe UI",8,FontStyle.Bold);retryUpdate.Visible=false;retryUpdate.Click+=async(_,_)=>await CheckUpdates();Controls.Add(retryUpdate);
         StyleButton(play,"JOUER À DEAD HORIZON  →",36,596,888,44,true);play.Enabled=false;play.Click+=async(_,_)=>await StartGame();Controls.Add(play);
         quality.SelectedIndex=Array.IndexOf(new[]{"auto","eco","balanced","high"},settings.Quality);if(quality.SelectedIndex<0)quality.SelectedIndex=0;
         resolution.SelectedItem=settings.Resolution;if(resolution.SelectedIndex<0)resolution.SelectedIndex=1;fps.SelectedIndex=settings.Fps==30?0:settings.Fps==120?2:settings.Fps==0?3:1;
-        Shown+=async(_,_)=>{await Detect();if(smoke!=null)await StartGame();};
-        FormClosing+=(_,_)=>SaveSettings();
+        Shown+=async(_,_)=>{await Detect();if(smoke!=null){starting=false;await StartGame();return;}if(justUpdated){starting=false;play.Enabled=true;status.Text="Mise à jour installée · v"+Program.Version.ToString(3)+" · réglages conservés.";}else await CheckUpdates();};
+        FormClosing+=(_,_)=>{shutdown.Cancel();SaveSettings();};
     }
     static Label LabelAt(string text,int x,int y,int w,int h,float size,FontStyle style=FontStyle.Regular,Color? color=null)=>new(){Text=text,Location=new Point(x,y),Size=new Size(w,h),Font=new Font("Segoe UI",size,style),ForeColor=color??Color.FromArgb(237,236,216)};
     static void StyleButton(Button b,string text,int x,int y,int w,int h,bool primary){b.Text=text;b.Location=new Point(x,y);b.Size=new Size(w,h);b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=primary?Accent:Color.FromArgb(78,100,82);b.BackColor=primary?Accent:PanelColor;b.ForeColor=primary?Ink:Color.FromArgb(237,236,216);b.Font=new Font("Segoe UI",10,FontStyle.Bold);b.Cursor=Cursors.Hand;}
     static void AddCombo(Panel parent,string title,ComboBox box,int y,string[] items){parent.Controls.Add(LabelAt(title,20,y,390,22,9,FontStyle.Regular,Muted));box.Location=new Point(20,y+25);box.Size=new Size(390,30);box.DropDownStyle=ComboBoxStyle.DropDownList;box.Items.AddRange(items);box.BackColor=Ink;box.ForeColor=Color.FromArgb(237,236,216);parent.Controls.Add(box);}
-    async Task Detect(){detect.Enabled=false;play.Enabled=false;try{hardware=await Task.Run(Hardware.Detect);pc.Text=$"{hardware.Cpu}\n{hardware.Threads} processeurs logiques · {hardware.RamGb:0.#} Go de mémoire\n\n{hardware.Gpu}";recommendation.Text="Profil conseillé : "+Quality.For(hardware.Recommended).Name;status.Text="Matériel détecté. La qualité automatique s’adapte aussi pendant la partie.";}catch(Exception e){hardware=new("Processeur Windows",Environment.ProcessorCount,0,"Détection partielle",0,false,"eco");pc.Text="Détection partielle. Le profil économique reste disponible.";Program.Log(e.Message);}finally{detect.Enabled=true;play.Enabled=true;}}
+    async Task Detect(){detect.Enabled=false;play.Enabled=false;try{hardware=await Task.Run(Hardware.Detect);pc.Text=$"{hardware.Cpu}\n{hardware.Threads} processeurs logiques · {hardware.RamGb:0.#} Go de mémoire\n\n{hardware.Gpu}";recommendation.Text="Profil conseillé : "+Quality.For(hardware.Recommended).Name;status.Text="Matériel détecté. La qualité automatique s’adapte aussi pendant la partie.";}catch(Exception e){hardware=new("Processeur Windows",Environment.ProcessorCount,0,"Détection partielle",0,false,"eco");pc.Text="Détection partielle. Le profil économique reste disponible.";Program.Log(e.Message);}finally{detect.Enabled=true;play.Enabled=!starting&&!checkingUpdate;}}
+    async Task CheckUpdates()
+    {
+        if(checkingUpdate)return;checkingUpdate=true;play.Enabled=false;detect.Enabled=false;retryUpdate.Visible=false;updateProgress.Visible=true;updateProgress.Value=0;
+        try {
+            var progress=new Progress<(string Text,int Percent)>(p=>{if(!IsDisposed){status.Text=p.Text;updateProgress.Value=Math.Clamp(p.Percent,0,100);}});
+            var result=await Program.Updates.PrepareAsync(progress,shutdown.Token);if(IsDisposed||shutdown.IsCancellationRequested)return;
+            status.Text=result.Message;retryUpdate.Visible=result.Retry;
+            if(result.Update is { } update){SaveSettings();Program.StartUpdated(update.Path);try{Program.Updates.Activate(update);}catch(Exception e){Program.Log("Mémorisation de la mise à jour : "+e.Message);}Close();return;}
+        }catch(OperationCanceledException)when(shutdown.IsCancellationRequested){}
+        catch(Exception e){Program.Log("Mise à jour : "+e.Message);if(!IsDisposed){status.Text="La version installée reste disponible. Réessaie la mise à jour plus tard.";retryUpdate.Visible=true;}}
+        finally{starting=false;checkingUpdate=false;if(!IsDisposed){play.Enabled=true;detect.Enabled=true;updateProgress.Visible=false;}}
+    }
     void SaveSettings(){settings.Quality=new[]{"auto","eco","balanced","high"}[Math.Max(0,quality.SelectedIndex)];settings.Resolution=resolution.SelectedItem?.ToString()??"1600 × 900";settings.Fps=fps.SelectedIndex switch{0=>30,2=>120,3=>0,_=>60};settings.Fullscreen=fullscreen.Checked;try{settings.Save();}catch(Exception e){Program.Log(e.Message);}}
     async Task StartGame()
     {

@@ -77,3 +77,13 @@ Three.js : MIT — voir le fichier récupéré `web/game/vendor/THREE-LICENSE.tx
 .NET : https://github.com/dotnet/runtime/blob/main/LICENSE.TXT. Microsoft WebView2 : licence Microsoft dans son paquet NuGet officiel.
 
 Les bâtiments, véhicules et équipements sont des modèles procéduraux simplifiés. Projet indépendant, sans affiliation aux jeux ou auteurs de mods évoqués pendant sa conception.
+
+## Mises à jour automatiques du lanceur (2.2+)
+
+Une dernière installation du lanceur 2.2 est nécessaire pour les anciennes versions. Ensuite, ouvrez le même fichier ou raccourci : il recherche la dernière version officielle au démarrage, télécharge automatiquement le jeu et le lanceur, vérifie la taille et l’empreinte SHA-256, puis redémarre. Les réglages, le profil local et la progression serveur sont conservés.
+
+Les versions sont installées sans droits administrateur dans `%LOCALAPPDATA%/DeadHorizon/Versions`. Le fichier téléchargé à l’origine reste le point d’entrée : il lance la version vérifiée en cache même hors connexion. Aucun fichier exécutable en cours d’utilisation n’est remplacé. Une panne réseau ou un téléchargement incomplet laisse la version installée disponible ; le bouton Réessayer relance la vérification. La mise à jour se fait avant de jouer.
+
+Le workflow construit une version unique (`major.minor.GITHUB_RUN_NUMBER`), prépare `update.json` et publie les fichiers dans une release brouillon. Elle devient publique seulement une fois tous les fichiers chargés. Le lanceur accepte uniquement l’URL du fichier `DeadHorizon.exe` de cette release GitHub officielle et refuse les versions plus anciennes. La source et les empreintes restent dans le même dépôt de confiance ; les exécutables ne sont pas signés Authenticode.
+
+Tests du système de mise à jour : `dotnet run --project test/updater/Updater.Tests.csproj -c Release`.

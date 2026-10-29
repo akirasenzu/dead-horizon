@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>DeadHorizon</AssemblyName>
     <RootNamespace>DeadHorizon</RootNamespace>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <Product>Dead Horizon Launcher</Product>
     <Description>Dead Horizon — Hazebrouck, lanceur Windows autonome</Description>
     <PublishSingleFile>true</PublishSingleFile>

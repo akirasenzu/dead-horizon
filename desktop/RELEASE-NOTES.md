@@ -1,9 +1,7 @@
-# Dead Horizon 2.1 — maisons accessibles
+# Dead Horizon 2.2 — mises à jour automatiques
 
-Hazebrouck agrandi de 30 %, bâtiments rehaussés, façades en briques et toitures en ardoise. Plus de 9 500 bâtiments avec rez-de-chaussée accessible : portes, pièces, mobilier, collisions et réserves à fouiller.
+Une dernière installation de ce lanceur active les mises à jour automatiques. Ensuite, ouvrez le même fichier ou raccourci : il télécharge la dernière version officielle du jeu et du lanceur, vérifie son intégrité puis redémarre, en conservant vos réglages.
 
-E ouvre ou ferme une porte. Les portes sont partagées entre les PC et sauvegardées sur le serveur commun. Le toit s’escamote en troisième personne lorsque vous entrez. Les étages restent visuels ; les intérieurs sont générés et ne reproduisent pas les logements réels.
+La version déjà installée reste disponible hors connexion ou si un téléchargement échoue. Un bouton Réessayer est proposé. Aucune installation administrateur n’est nécessaire et aucune mise à jour ne coupe une partie en cours.
 
-Téléchargez ce nouveau DeadHorizon.exe pour disposer de la carte et des collisions mises à jour. Vos réglages sont conservés. Lanceur Windows x64 autonome avec réglages graphiques ; Microsoft WebView2 Evergreen nécessaire.
-
-Un serveur commun jusqu’à 16 joueurs, sans code. Le solo reste disponible hors connexion.
+Hazebrouck conserve ses 9 575 bâtiments accessibles au rez-de-chaussée, ses portes synchronisées et son serveur commun jusqu’à 16 joueurs.

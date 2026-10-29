@@ -30,24 +30,29 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm test
           pnpm build
+      - name: Vérifier les mises à jour automatiques
+        run: dotnet run --project test/updater/Updater.Tests.csproj -c Release
       - name: Construire le lanceur Windows
         shell: pwsh
         run: ./scripts/build-desktop.ps1
-      - name: Préparer le téléchargement
+      - name: Préparer le téléchargement vérifié
         shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path desktop/release -Force | Out-Null
-          Copy-Item desktop/publish/DeadHorizon.exe desktop/release/DeadHorizon.exe
-          Copy-Item desktop/LIRE-MOI.txt desktop/release/LIRE-MOI.txt
-          Copy-Item web/game/MAP-LICENSE.txt desktop/release/LICENCE-CARTE.txt
-          Copy-Item web/game/vendor/THREE-LICENSE.txt desktop/release/LICENCE-THREE.txt
-          $checksum=(Get-FileHash desktop/release/DeadHorizon.exe -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$checksum  DeadHorizon.exe" | Set-Content -Encoding utf8 desktop/release/SHA256SUMS.txt
-          Compress-Archive -Path desktop/release/* -DestinationPath desktop/DeadHorizon-Windows.zip -CompressionLevel Optimal
+        run: ./scripts/prepare-release.ps1
       - name: Publier la version PC
         env:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
         run: |
-          $tag="pc-v2.1.$env:GITHUB_RUN_NUMBER"
-          gh release create $tag desktop/release/DeadHorizon.exe desktop/DeadHorizon-Windows.zip desktop/release/SHA256SUMS.txt --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Dead Horizon PC — Maisons accessibles" --notes-file desktop/RELEASE-NOTES.md --latest
+          $version=(Get-Content desktop/publish/version.txt -Raw).Trim()
+          $tag="pc-v$version"
+          $assets=@('desktop/release/DeadHorizon.exe','desktop/DeadHorizon-Windows.zip','desktop/release/SHA256SUMS.txt','desktop/release/update.json')
+          $existing=gh release view $tag --repo $env:GITHUB_REPOSITORY --json isDraft 2>$null
+          if($LASTEXITCODE -eq 0){
+            if(!(($existing | ConvertFrom-Json).isDraft)){throw 'Cette version est déjà publiée et reste immuable.'}
+            gh release upload $tag @assets --clobber --repo $env:GITHUB_REPOSITORY
+          }else{
+            gh release create $tag @assets --draft --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Dead Horizon PC — Mises à jour automatiques" --notes-file desktop/RELEASE-NOTES.md
+          }
+          if($LASTEXITCODE -ne 0){throw 'Préparation de la publication impossible.'}
+          gh release edit $tag --draft=false --latest --repo $env:GITHUB_REPOSITORY
+          if($LASTEXITCODE -ne 0){throw 'Publication impossible.'}

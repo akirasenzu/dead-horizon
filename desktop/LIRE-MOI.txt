@@ -19,3 +19,8 @@ Les mises à jour du jeu se téléchargent depuis le site ou les versions GitHub
 
 Carte : © OpenStreetMap contributors, ODbL. Three.js : MIT. .NET : MIT. WebView2 : licence Microsoft.
 Code et attributions : https://github.com/akirasenzu/dead-horizon
+
+MISES À JOUR AUTOMATIQUES — VERSION 2.2 ET SUIVANTES
+Au démarrage, le lanceur télécharge et vérifie la dernière version officielle, puis redémarre automatiquement. Ouvrez toujours le même fichier ou raccourci. Vos réglages sont conservés.
+Une dernière installation de cette version est nécessaire si vous utilisiez un ancien lanceur.
+Si Internet est indisponible, le jeu installé reste utilisable en solo. En cas de problème, le bouton Réessayer relance la mise à jour. Aucun droit administrateur n’est nécessaire.

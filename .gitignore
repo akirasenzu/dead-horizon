@@ -10,3 +10,6 @@ desktop/release/
 desktop/*.zip
 
 web/game/housing-layout.json
+
+test/updater/bin/
+test/updater/obj/
