@@ -1,6 +1,6 @@
 {
   "name": "dead-horizon-online",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,11 @@
   },
   "devDependencies": {
     "drizzle-kit": "0.31.4",
-    "drizzle-orm": "0.44.2"
+    "drizzle-orm": "0.44.2",
+    "esbuild": "0.25.5"
   },
-  "packageManager": "pnpm@11.25.0"
+  "packageManager": "pnpm@11.25.0",
+  "dependencies": {
+    "@noble/hashes": "2.4.0"
+  }
 }

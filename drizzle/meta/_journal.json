@@ -8,6 +8,13 @@
       "when": 1793302201947,
       "tag": "0000_silent_titania",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793310431539,
+      "tag": "0001_complex_earthquake",
+      "breakpoints": true
     }
   ]
 }

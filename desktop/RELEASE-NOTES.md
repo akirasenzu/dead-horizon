@@ -1,7 +1,7 @@
-# Dead Horizon 2.2 — mises à jour automatiques
+# Dead Horizon 3.0 — comptes et personnages
 
-Une dernière installation de ce lanceur active les mises à jour automatiques. Ensuite, ouvrez le même fichier ou raccourci : il télécharge la dernière version officielle du jeu et du lanceur, vérifie son intégrité puis redémarre, en conservant vos réglages.
+Créez un compte dans le client, connectez-vous puis créez votre personnage : nom, teint, cheveux et équipement. Un seul personnage vivant par compte. Retrouvez-le depuis un autre PC avec son inventaire et sa progression.
 
-La version déjà installée reste disponible hors connexion ou si un téléchargement échoue. Un bouton Réessayer est proposé. Aucune installation administrateur n’est nécessaire et aucune mise à jour ne coupe une partie en cours.
+La mort en ligne est définitive : créez un nouveau personnage pour retourner à Hazebrouck. Votre compte reste disponible. Le solo hors connexion reste jouable sans compte.
 
-Hazebrouck conserve ses 9 575 bâtiments accessibles au rez-de-chaussée, ses portes synchronisées et son serveur commun jusqu’à 16 joueurs.
+Mises à jour automatiques conservées : fermez puis rouvrez votre lanceur pour recevoir cette version. Les lanceurs antérieurs à 2.2 nécessitent une dernière installation manuelle.
