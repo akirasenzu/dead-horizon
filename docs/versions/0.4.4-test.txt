@@ -1,7 +1,0 @@
-Dead County 3D v0.4.4-test — 14 octobre 2026
-
-Etat : version candidate de test, pas encore publiée dans le manifeste du launcher.
-Base : v0.4.3-test, 12 zombies visibles au démarrage.
-Changements : détails visuels des zombies (yeux, marques, variantes) ; oscillation d'errance plus lisible.
-Préservés : caméra stable v0.3.1, contrôles, apparition initiale des zombies, Godot 4.7.2 et architecture solo/multijoueur expérimentale.
-La version doit être testée dans Godot avant de remplacer le manifeste de production.

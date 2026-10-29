@@ -1,0 +1,32 @@
+[
+  {
+    "path": "web/game/vendor/three.module.js",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "sha256": "ce1fa418de16a19495a9f72495580e3015d7745c296d3ce0485897f902ddedfb"
+  },
+  {
+    "path": "web/game/vendor/THREE-LICENSE.txt",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.170.0/LICENSE",
+    "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
+  },
+  {
+    "path": "web/game/hazebrouck-map.json",
+    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/game/hazebrouck-map.json",
+    "sha256": "d960de112026f9674ac1775a52fb4112b8f787befec560c17493a85275596c4a"
+  },
+  {
+    "path": "web/assets/hazebrouck.png",
+    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/assets/hazebrouck.png",
+    "sha256": "800a9e9eb8177e55ad0ee0fe7d0b9192ded961ca7fb4e3aaf06c402fe2af5a27"
+  },
+  {
+    "path": "web/assets/DeadHorizon.ico",
+    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/assets/DeadHorizon.ico",
+    "sha256": "c013529d37d5077786a0f051723f1041966b040faacfaee8ec66208654dc8c91"
+  },
+  {
+    "path": "desktop/DeadHorizon.ico",
+    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/assets/DeadHorizon.ico",
+    "sha256": "c013529d37d5077786a0f051723f1041966b040faacfaee8ec66208654dc8c91"
+  }
+]

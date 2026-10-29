@@ -1,0 +1,21 @@
+DEAD HORIZON 2.0 — SERVEUR COMMUN
+
+Ouvre DeadHorizon.exe puis clique sur JOUER. Dans le jeu, choisis ton pseudo et REJOINDRE LE SERVEUR.
+Tout le monde se retrouve sur le même serveur Hazebrouck, sans code. Jusqu’à 16 joueurs.
+Le serveur est : https://dead-horizon-coop-291026.keentoad34.chatgpt.site/
+
+Le mode solo reste disponible hors connexion. Le multijoueur exige Internet.
+ZQSD / WASD : bouger ; E : interagir ; Espace : tirer ; R : recharger ; I : inventaire ; M : carte ; F5 : vue.
+Échap libère la souris. Le monde en ligne continue pendant les menus.
+F11 ou Alt + Entrée : plein écran ; Alt + F4 : revenir au lanceur.
+
+Windows 10 / 11 64 bits. .NET est inclus. Microsoft WebView2 Evergreen doit être installé.
+Si ce composant Microsoft manque : https://developer.microsoft.com/microsoft-edge/webview2/
+
+Les réglages du lanceur sont conservés dans %LOCALAPPDATA%\DeadHorizon.
+Le monde partagé est conservé par le serveur. La progression solo n’est pas sauvegardée.
+Version alpha : modèles simplifiés, une voiture commune de quatre places, synchronisation périodique.
+Les mises à jour du jeu se téléchargent depuis le site ou les versions GitHub ; elles ne sont pas automatiques.
+
+Carte : © OpenStreetMap contributors, ODbL. Three.js : MIT. .NET : MIT. WebView2 : licence Microsoft.
+Code et attributions : https://github.com/akirasenzu/dead-county-updates

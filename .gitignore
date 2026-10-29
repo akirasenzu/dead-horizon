@@ -1,0 +1,10 @@
+node_modules/
+.sites-runtime/
+desktop/bin/
+desktop/obj/
+desktop/packages/
+desktop/publish/
+desktop/Game.bundle.zip
+*.tar.gz
+desktop/release/
+desktop/*.zip
