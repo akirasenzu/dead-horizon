@@ -4,7 +4,7 @@ Dead Horizon remplace l’ancien projet Dead County dans ce dépôt. L’histori
 
 **Site :** https://dead-horizon-coop-291026.keentoad34.chatgpt.site/
 
-**Version PC :** https://github.com/akirasenzu/dead-county-updates/releases/latest
+**Version PC :** https://github.com/akirasenzu/dead-horizon/releases/latest
 
 ## Jouer
 

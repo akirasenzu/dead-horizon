@@ -18,4 +18,4 @@ Version alpha : modèles simplifiés, une voiture commune de quatre places, sync
 Les mises à jour du jeu se téléchargent depuis le site ou les versions GitHub ; elles ne sont pas automatiques.
 
 Carte : © OpenStreetMap contributors, ODbL. Three.js : MIT. .NET : MIT. WebView2 : licence Microsoft.
-Code et attributions : https://github.com/akirasenzu/dead-county-updates
+Code et attributions : https://github.com/akirasenzu/dead-horizon
