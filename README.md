@@ -18,14 +18,14 @@ Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le compo
 - Chaque PC contrôle son propre personnage ; aucun duo sur le même clavier.
 - Positions, santé, inventaires, tirs, zombies, caisses et voiture calculés par le serveur.
 - Une voiture partagée (quatre places) ; catalogue de 174 modèles. Le premier joueur d’un nouveau monde définit son modèle. Le choix du véhicule en solo reste libre.
-- Près de 14 000 bâtiments extérieurs, rues réelles, six lieux à découvrir.
+- Près de 14 000 bâtiments, rues réelles et six lieux à découvrir. Plan agrandi de 30 % pour le jeu ; hauteurs rehaussées, portes de 2,65 m, plafonds de 3,4 m. Plus de 9 500 bâtiments disposent d’un rez-de-chaussée accessible, avec pièces, mobilier et collisions. Les étages restent visuels. Les plans intérieurs sont générés et ne représentent pas les domiciles réels.
 - Sauvegarde du monde en base D1. Les mises à jour peuvent imposer une remise à zéro.
 - Munitions et ressources renouvelables. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
 - Pas de comptes, de chat ou de serveur privé. Un pseudo et une session locale identifient chaque connexion. Les données du serveur ne contiennent pas de mot de passe.
 
 ## Commandes
 
-ZQSD / WASD : marcher ou conduire · E : fouiller / monter / descendre · Espace : tirer · R : recharger · F : mêlée · X : arme secondaire · T : munition · I : inventaire · M : carte · F5 : vue.
+ZQSD / WASD : marcher ou conduire · E : ouvrir ou fermer une porte / fouiller / monter / descendre · Espace : tirer · R : recharger · F : mêlée · X : arme secondaire · T : munition · I : inventaire · M : carte · F5 : vue.
 
 Échap libère la souris et ouvre le menu ; le monde continue en ligne. F11 ou Alt + Entrée change le plein écran dans le lanceur. Alt + F4 ferme le jeu et revient au lanceur.
 
@@ -63,6 +63,8 @@ Ouvrez http://127.0.0.1:4318/. Pour le lanceur, depuis PowerShell :
 - `desktop/` : lanceur natif Windows avec moteur WebView2 embarqué.
 - `docs/` : page GitHub Pages du dépôt, liée au site et au téléchargement du lanceur.
 - GitHub Actions construit les sources et publie une version PC lors des mises à jour de `main`.
+
+Les intérieurs sont préparés lors de la construction, puis chargés à proximité du joueur. Les portes sont persistantes et partagées. La mise à l’échelle migre les positions et conserve les inventaires du monde existant.
 
 Le protocole transmet des commandes, pas une copie arbitraire du monde du client. Le serveur vérifie les sessions, déduplique les commandes et arbitre les prises de ressources avec une mise à jour atomique du monde. La limite actuelle et la synchronisation HTTP imposent des essais de charge avant d’augmenter le nombre de joueurs.
 

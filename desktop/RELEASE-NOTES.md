@@ -1,9 +1,9 @@
-# Dead Horizon 2.0 — serveur commun
+# Dead Horizon 2.1 — maisons accessibles
 
-Lanceur Windows autonome, détection du PC, profils graphiques et réglages mémorisés.
+Hazebrouck agrandi de 30 %, bâtiments rehaussés, façades en briques et toitures en ardoise. Plus de 9 500 bâtiments avec rez-de-chaussée accessible : portes, pièces, mobilier, collisions et réserves à fouiller.
 
-Un seul serveur Hazebrouck, jusqu’à 16 joueurs, chacun sur son PC. Aucun code de salon. Internet nécessaire pour le multijoueur. Le mode solo reste accessible hors connexion.
+E ouvre ou ferme une porte. Les portes sont partagées entre les PC et sauvegardées sur le serveur commun. Le toit s’escamote en troisième personne lorsque vous entrez. Les étages restent visuels ; les intérieurs sont générés et ne reproduisent pas les logements réels.
 
-Téléchargez `DeadHorizon.exe` ou extrayez l’archive Windows, ouvrez le lanceur puis rejoignez le serveur avec votre pseudo.
+Téléchargez ce nouveau DeadHorizon.exe pour disposer de la carte et des collisions mises à jour. Vos réglages sont conservés. Lanceur Windows x64 autonome avec réglages graphiques ; Microsoft WebView2 Evergreen nécessaire.
 
-Version alpha avec modèles simplifiés, une voiture commune et synchronisation HTTP périodique.
+Un serveur commun jusqu’à 16 joueurs, sans code. Le solo reste disponible hors connexion.

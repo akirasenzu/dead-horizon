@@ -8,3 +8,5 @@ desktop/Game.bundle.zip
 *.tar.gz
 desktop/release/
 desktop/*.zip
+
+web/game/housing-layout.json
