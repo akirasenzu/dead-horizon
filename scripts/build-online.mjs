@@ -16,5 +16,5 @@ const world=fs.readFileSync('server/world.js','utf8').replace(/^import .*housing
 const housing=fs.readFileSync('web/game/housing.js','utf8').replace(/\bexport /g,'');
 const entry=fs.readFileSync('server/entry.js','utf8');
 const accountBundle=(await bundle({entryPoints:['server/accounts.js'],bundle:true,write:false,format:'iife',globalName:'AccountModule',platform:'browser',target:'es2022',minify:true})).outputFiles[0].text;
-const source=`const ASSETS=${JSON.stringify(assets)};\nconst MAP=${JSON.stringify(map)};MAP.housingLayouts=JSON.parse(atob(ASSETS["/game/housing-layout.json"][1]));\nconst CATALOG=${JSON.stringify(catalog)};\n${arsenal}\n${housing}\n${world}\n${accountBundle}\n${entry}`;
+const source=`const ASSETS=${JSON.stringify(assets)};\nconst MAP=${JSON.stringify(map)};\nconst CATALOG=${JSON.stringify(catalog)};\n${arsenal}\n${housing}\n${world}\n${accountBundle}\n${entry}`;
 fs.writeFileSync(path.join(dist,'server/index.js'),source);fs.copyFileSync('.openai/hosting.json',path.join(dist,'.openai/hosting.json'));console.log(`Serveur construit : ${(source.length/1048576).toFixed(2)} Mo, ${Object.keys(assets).length} ressources intégrées.`);
