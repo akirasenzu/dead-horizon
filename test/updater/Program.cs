@@ -16,7 +16,7 @@ try
 {
     string installed = Path.Combine(root,"original-DeadHorizon.exe");File.WriteAllText(installed,"unchanged original bootstrap");
     var manager=Manager(root,r=>r.RequestUri!.AbsoluteUri==UpdateManager.Feed?Json(Manifest()):Binary(bytes));
-    var update=await manager.PrepareAsync(null);Check(update.Update?.Version==new Version(2,2,9),"Newer version must be prepared");
+    var update=await manager.PrepareAsync(null);Check(update.Update?.Version==new Version(2,2,9),"Newer version must be prepared: "+update.Message);
     Check(File.ReadAllBytes(update.Update!.Path).SequenceEqual(bytes),"Downloaded file must match the release");
     Check(manager.CachedUpdate()==null,"Downloading must not activate an update");
     manager.Activate(update.Update);Check(manager.CachedUpdate()?.Version==new Version(2,2,9),"A later launch from the original bootstrap must find the verified update");

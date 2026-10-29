@@ -13,3 +13,7 @@ web/game/housing-layout.json
 
 test/updater/bin/
 test/updater/obj/
+
+web/game/local-engine.js
+
+desktop/publish-survival/

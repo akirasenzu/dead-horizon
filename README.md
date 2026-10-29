@@ -8,7 +8,7 @@ Dead Horizon remplace l’ancien projet Dead County dans ce dépôt. L’histori
 
 ## Jouer
 
-Téléchargez `DeadHorizon.exe`, ouvrez le lanceur, connectez-vous à votre compte, créez votre personnage puis cliquez sur **Rejoindre le serveur**. Tous les joueurs rejoignent le même monde la ville, sans code ni salon. Internet est nécessaire pour ce mode ; le solo reste disponible hors connexion.
+Téléchargez `DeadHorizon.exe`, ouvrez le lanceur, connectez-vous à votre compte, créez votre personnage puis cliquez sur **Rejoindre le serveur**. Tous les joueurs rejoignent le même monde, sans code ni salon. Internet est nécessaire pour ce mode ; le solo reste disponible hors connexion.
 
 Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le composant Microsoft WebView2 Evergreen, déjà installé sur la plupart des PC Windows récents. Le lien officiel pour l’installer si nécessaire : https://developer.microsoft.com/microsoft-edge/webview2/.
 
@@ -16,11 +16,11 @@ Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le compo
 
 - Serveur commun jusqu’à **16 joueurs simultanés**.
 - Chaque PC contrôle son propre personnage ; aucun duo sur le même clavier.
-- Positions, santé, inventaires, tirs, zombies, caisses et voiture calculés par le serveur.
-- Une voiture partagée (quatre places) ; catalogue de 174 modèles. Le premier joueur d’un nouveau monde définit son modèle. Le choix du véhicule en solo reste libre.
+- Positions, santé, inventaires, tirs, zombies, rangements et véhicules calculés par le serveur.
+- 174 véhicules à découvrir dans le monde, avec carburant, état, clés et rangements. Aucun choix de véhicule au départ.
 - Près de 14 000 bâtiments, rues réelles et six lieux à découvrir. Plan agrandi de 30 % pour le jeu ; hauteurs rehaussées, portes de 2,65 m, plafonds de 3,4 m. Plus de 9 500 bâtiments disposent d’un rez-de-chaussée accessible, avec pièces, mobilier et collisions. Les étages restent visuels. Les plans intérieurs sont générés et ne représentent pas les domiciles réels.
 - Sauvegarde du monde en base D1. Les mises à jour peuvent imposer une remise à zéro.
-- Munitions et ressources renouvelables. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
+- Ressources persistantes et limitées, à fouiller puis à transporter. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
 - Comptes avec identifiant et mot de passe, connexion mémorisée au choix pendant 30 jours. Un seul personnage vivant par compte ; nom, apparence, inventaire et progression conservés sur le serveur. Mort définitive : création d’un nouveau personnage. Pas de chat ni de serveur privé.
 
 ## Commandes
@@ -95,3 +95,14 @@ Les comptes utilisent D1 : identifiant unique, mot de passe protégé par scrypt
 Les personnages font partie de la sauvegarde atomique du monde. Reconnexion ou autre PC : le compte retrouve le même personnage, sa position, sa santé et ses stocks. Le serveur refuse la recréation d’un personnage vivant et la résurrection d’un personnage mort. Après décès, un nouveau nom, une nouvelle apparence et un nouvel équipement peuvent être choisis. Le mode solo hors connexion reste indépendant, sans compte.
 
 Les niveaux de travail de scrypt suivent la recommandation équivalente à mémoire de 32 Mio de l’[OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#scrypt), avec la bibliothèque [noble-hashes](https://github.com/paulmillr/noble-hashes). Les calculs sont sérialisés par instance pour limiter la mémoire de l’hébergement. Aucune récupération de mot de passe par e-mail n’est implémentée.
+
+
+## Survie 4.0
+
+Le départ ne propose plus de catalogue d’armes, de protections ni de véhicules. Créez un personnage (apparence, métier, traits et budget de points), puis explorez avec une tenue et deux bandes de tissu.
+
+I ouvre l’inventaire individuel et les rangements à portée. Fouillez un rangement, puis transférez les objets voulus. Nourriture, eau, soins, sacs, armes, vêtements, munitions et accessoires doivent être trouvés. Le poids limite la capacité de portage et la surcharge ralentit le personnage. Les aliments frais s’abîment ; les réserves domestiques d’eau sont limitées. Les objets pris ne réapparaissent pas automatiquement.
+
+174 véhicules disposent de clés, d’un état mécanique et d’un réservoir distincts. Le métier mécanicien permet le démarrage au tournevis. Essence, pièces et outils se trouvent en fouillant. La mort laisse les objets portés au sol. Le solo emploie le même moteur de simulation et conserve son monde sur le PC.
+
+Migration : les anciens équipements gratuits sont retirés une seule fois. Compte, identité, apparence, position et décès sont conservés. Le client 4.0 est nécessaire pour rejoindre le serveur actualisé. Les étages restent visuels ; cette version ne prétend pas reproduire toutes les mécaniques de Project Zomboid.

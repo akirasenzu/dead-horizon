@@ -1,7 +1,29 @@
-# Dead Horizon 3.0 — comptes et personnages
+# Dead Horizon PC — Survie 4.0
 
-Créez un compte dans le client, connectez-vous puis créez votre personnage : nom, teint, cheveux et équipement. Un seul personnage vivant par compte. Retrouvez-le depuis un autre PC avec son inventaire et sa progression.
 
-La mort en ligne est définitive : créez un nouveau personnage pour retourner dans la ville. Votre compte reste disponible. Le solo hors connexion reste jouable sans compte.
 
-Mises à jour automatiques conservées : fermez puis rouvrez votre lanceur pour recevoir cette version. Les lanceurs antérieurs à 2.2 nécessitent une dernière installation manuelle.
+Crée ton survivant avec un métier, des qualités et des défauts. Départ sans arme, protection ni véhicule attribué : tout se trouve dans le monde.
+
+
+
+- Inventaire individuel avec poids, sacs, équipement, objets consommables et accessoires d’armes.
+
+- Faim, soif, endurance, fatigue et saignements ; nourriture, eau et pansements à trouver et à utiliser.
+
+- Plus de 18 000 rangements dans les maisons accessibles. Fouille manuelle, objets partagés et persistants, sans réapparition automatique.
+
+- 174 véhicules répartis dans le monde : clé, carburant, état mécanique, réparation et ravitaillement.
+
+- Mêlée, armes à feu et munitions par calibre. Rechargement à partir des cartouches réellement portées.
+
+- Mort définitive avec objets laissés au sol. Personnage et inventaire conservés à la reconnexion.
+
+- Solo sauvegardé sur ce PC, avec les mêmes règles de survie que le serveur.
+
+
+
+Au premier passage à cette version, l’ancien équipement gratuit est retiré des personnages. Les comptes, noms, apparences, positions et morts sont conservés.
+
+
+
+Le lanceur et le jeu se mettent à jour automatiquement au prochain démarrage. Aucun nouveau téléchargement manuel n’est nécessaire.
