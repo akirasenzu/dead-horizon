@@ -17,3 +17,5 @@ test/updater/obj/
 web/game/local-engine.js
 
 desktop/publish-survival/
+
+desktop/publish-exploration/

@@ -18,7 +18,7 @@ Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le compo
 - Chaque PC contrôle son propre personnage ; aucun duo sur le même clavier.
 - Positions, santé, inventaires, tirs, zombies, rangements et véhicules calculés par le serveur.
 - 174 véhicules à découvrir dans le monde, avec carburant, état, clés et rangements. Aucun choix de véhicule au départ.
-- Près de 14 000 bâtiments, rues réelles et six lieux à découvrir. Plan agrandi de 30 % pour le jeu ; hauteurs rehaussées, portes de 2,65 m, plafonds de 3,4 m. Plus de 9 500 bâtiments disposent d’un rez-de-chaussée accessible, avec pièces, mobilier et collisions. Les étages restent visuels. Les plans intérieurs sont générés et ne représentent pas les domiciles réels.
+- Près de 14 000 bâtiments, rues réelles et six lieux à découvrir. Plan agrandi de 30 % pour le jeu ; hauteurs rehaussées, portes de 2,65 m, plafonds de 3,4 m. Plus de 9 500 bâtiments disposent d’un rez-de-chaussée accessible, avec pièces, mobilier et collisions. Plus de 8 700 maisons disposent d’escaliers et d’étages meublés accessibles. Les plans intérieurs sont générés et ne représentent pas les domiciles réels.
 - Sauvegarde du monde en base D1. Les mises à jour peuvent imposer une remise à zéro.
 - Ressources persistantes et limitées, à fouiller puis à transporter. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
 - Comptes avec identifiant et mot de passe, connexion mémorisée au choix pendant 30 jours. Un seul personnage vivant par compte ; nom, apparence, inventaire et progression conservés sur le serveur. Mort définitive : création d’un nouveau personnage. Pas de chat ni de serveur privé.
@@ -105,4 +105,15 @@ I ouvre l’inventaire individuel et les rangements à portée. Fouillez un rang
 
 174 véhicules disposent de clés, d’un état mécanique et d’un réservoir distincts. Le métier mécanicien permet le démarrage au tournevis. Essence, pièces et outils se trouvent en fouillant. La mort laisse les objets portés au sol. Le solo emploie le même moteur de simulation et conserve son monde sur le PC.
 
-Migration : les anciens équipements gratuits sont retirés une seule fois. Compte, identité, apparence, position et décès sont conservés. Le client 4.0 est nécessaire pour rejoindre le serveur actualisé. Les étages restent visuels ; cette version ne prétend pas reproduire toutes les mécaniques de Project Zomboid.
+Migration : les anciens équipements gratuits sont retirés une seule fois. Compte, identité, apparence, position et décès sont conservés. Le client 4.0 est nécessaire pour rejoindre le serveur actualisé. La version 5 ajoute les étages accessibles ; le jeu reste en alpha.
+
+
+## Exploration, combats et personnages — 5.0
+
+- Plus de 8 700 maisons avec escaliers, jusqu’à quatre niveaux selon la hauteur et la place disponible. E au palier change de niveau ; B permet aussi de descendre. Les boutons de l’inventaire offrent la même action. Les cloisons, meubles et cages d’escalier ont des collisions ; les planchers empêchent de tirer ou de fouiller d’un étage à l’autre.
+- Les zombies utilisent la vue et le bruit, gardent une mémoire temporaire, contournent les obstacles, endommagent les portes et suivent les escaliers. Leur navigation est calculée avec un budget limité par mise à jour.
+- Les tirs suivent le viseur. La mêlée frappe devant soi et consomme de l’endurance. Clic gauche / Espace : attaque ; clic droit : viser ; Ctrl gauche : déplacement discret ; Maj : courir. La fatigue et les déplacements influencent la précision. Les armes très usées peuvent s’enrayer ; R les dégage. Les attaques de zombie ont un délai indépendant du nombre de requêtes. Les griffures et bandages sont visibles dans l’inventaire, ainsi que la progression en mêlée et au tir.
+- Création du survivant avec aperçu 3D orientable, nom, âge, silhouette, taille, teint, coiffure, couleur des cheveux, barbe et tenue civile. Métier, traits et budget de points restent validés côté serveur. L’apparence ne donne pas d’équipement supplémentaire.
+- Les comptes, personnages, objets déjà trouvés et ressources prises sont conservés. La position à l’étage, les blessures et la progression se retrouvent après reconnexion. Le protocole 5 demande de relancer le lanceur pour recevoir la nouvelle version.
+
+Les intérieurs sont générés. Les escaliers changent de niveau par interaction au palier. Les bâtiments trop petits pour réserver deux paliers sûrs restent accessibles uniquement au rez-de-chaussée. Cette alpha ne reproduit pas toutes les mécaniques d’un jeu de survie complet.

@@ -1,3 +1,4 @@
+import {addLevels} from './levels.js';
 // Shared deterministic layout: the browser and the authoritative server use
 // exactly the same footprints, door openings, partitions and furniture.
 export const CITY_SCALE=1.3,HOUSING_VERSION=1,FLOOR_HEIGHT=3.4;
@@ -62,5 +63,5 @@ export function createHousing(data){
  }
  function toggleDoor(h,actors=[]){if(!h?.enterable)return false;if(isOpen(h)&&actors.some(a=>segmentDistance(a.x,a.z,[h.door.x-h.door.ux,h.door.z-h.door.uz],[h.door.x+h.door.ux,h.door.z+h.door.uz])<.85))return false;doors[h.id]=!isOpen(h);return true}
  function lootPoints(){return houses.filter(h=>h.enterable&&Math.hypot(h.x,h.z)<2000).sort((a,b)=>a.id-b.id).filter((_,i)=>i%3===0).slice(0,180).map((h,i)=>{const p=h.point(0,3);return{x:p[0],z:p[1],type:['food','ammo','part','fuel'][i%4],house:h.id}}).filter(l=>!blocked(l.x,l.z,.55))}
- return{houses,byId,near:(x,z,r=30)=>near(grid,x,z,r),blocked,insideHouse,nearestDoor,toggleDoor,isOpen,setDoors,getDoors:()=>doors,lootPoints,count:houses.filter(h=>h.enterable).length};
+ return addLevels({houses,byId,near:(x,z,r=30)=>near(grid,x,z,r),blocked,insideHouse,nearestDoor,toggleDoor,isOpen,setDoors,getDoors:()=>doors,lootPoints,count:houses.filter(h=>h.enterable).length},pointInside,segmentDistance);
 }

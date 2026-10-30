@@ -46,21 +46,49 @@ export function createHousingView(scene,housing){
  for(const {out,kind}of sectors.values()){const m=makeMesh(out,kind==='wall'?wallMat:kind==='roof'?roofMat:plainMat);root.add(m);sectorMeshes.push(m)}sectors.clear();
  const loaded=new Map(),doorMaterial=new T.MeshStandardMaterial({color:0x345048,roughness:.75}),handleMaterial=new T.MeshStandardMaterial({color:0xc8b07a,metalness:.5,roughness:.4});
  const boxGeometry=new T.BoxGeometry(1,1,1);
- function interior(h){const g=new T.Group(),out=buffer(),floor=buffer(),ceil=buffer(),id=h.renderId;root.add(g);polygon(floor,h.poly,.055,0xc1ad91,id);g.add(makeMesh(floor,floorMat));polygon(ceil,h.poly,3.38,0xdbd4c2,id);const ceiling=makeMesh(ceil,plainMat);g.add(ceiling);
-  const put=(u,y,v,w,ht,d,color)=>{const a=h.point(u-w/2,v-d/2),b=h.point(u+w/2,v-d/2),c=h.point(u+w/2,v+d/2),e=h.point(u-w/2,v+d/2);quad(out,[a[0],y,a[1]],[b[0],y,b[1]],[b[0],y+ht,b[1]],[a[0],y+ht,a[1]],color,id);quad(out,[b[0],y,b[1]],[c[0],y,c[1]],[c[0],y+ht,c[1]],[b[0],y+ht,b[1]],color,id);quad(out,[c[0],y,c[1]],[e[0],y,e[1]],[e[0],y+ht,e[1]],[c[0],y+ht,c[1]],color,id);quad(out,[e[0],y,e[1]],[a[0],y,a[1]],[a[0],y+ht,a[1]],[e[0],y+ht,e[1]],color,id);quad(out,[a[0],y+ht,a[1]],[b[0],y+ht,b[1]],[c[0],y+ht,c[1]],[e[0],y+ht,e[1]],color,id)};
-  for(const s of h.segments){const dx=s.b[0]-s.a[0],dz=s.b[1]-s.a[1],len=Math.hypot(dx,dz),sg=pointSign(h.poly),nx=-dz/len*.035*sg,nz=dx/len*.035*sg;quad(out,[s.a[0]+nx,.12,s.a[1]+nz],[s.b[0]+nx,.12,s.b[1]+nz],[s.b[0]+nx,3.35,s.b[1]+nz],[s.a[0]+nx,3.35,s.a[1]+nz],0xd0c3ab,id)}
-  for(const s of h.partitions)quad(out,[s.a[0],0,s.a[1]],[s.b[0],0,s.b[1]],[s.b[0],3.35,s.b[1]],[s.a[0],3.35,s.a[1]],0xb7b5a4,id);
-  for(const f of h.furniture){if(f.kind==='bed'){put(f.u,.12,f.v,f.w,.35,f.d,0x66533d);put(f.u,.47,f.v,f.w,.2,f.d,0xd6cebb);put(f.u,.68,f.v+.3,f.w,.05,f.d*.65,0x6a8278);put(f.u,.69,f.v-f.d*.32,f.w*.7,.15,.45,0xe0d7c3)}else if(f.kind==='sofa'){put(f.u,.05,f.v,f.w,.42,f.d,0x526e65);put(f.u,.45,f.v+.28,f.w,.55,.2,0x435b51);for(const side of[-1,1])put(f.u+side*(f.w/2-.1),.42,f.v,.2,.28,f.d,0x4e665b)}else if(f.kind==='kitchen'){put(f.u,.05,f.v,f.w,.85,f.d,0x7e8a82);put(f.u,.9,f.v,f.w,.08,f.d,0xc3beb0);put(f.u,.99,f.v,.55,.02,.45,0x383d3d)}else{put(f.u,.05,f.v,f.w,1.7,f.d,0x7b6046);put(f.u,1.4,f.v-f.d/2-.02,f.w*.8,.04,.04,0xc0b18c)}}
-  const furniture=makeMesh(out,plainMat);g.add(furniture);const d=h.door,pivot=new T.Group();pivot.position.set(d.x-d.ux*d.width/2,0,d.z-d.uz*d.width/2);pivot.rotation.y=Math.atan2(-d.uz,d.ux);g.add(pivot);const leaf=new T.Mesh(boxGeometry,doorMaterial);leaf.scale.set(d.width,2.58,.1);leaf.position.set(d.width/2,1.29,0);pivot.add(leaf);const handle=new T.Mesh(boxGeometry,handleMaterial);handle.scale.set(.15,.06,.18);handle.position.set(d.width-.18,1.1,0);pivot.add(handle);g.updateMatrixWorld(true);return{h,g,pivot,ceiling,baseAngle:pivot.rotation.y,stamp:0};
+ function interior(h){
+  const g=new T.Group(),out=buffer(),floors=buffer(),ceilings=[],groups=[],id=h.renderId;root.add(g);
+  const floorPolygon=(out,y,color,hole=false)=>{
+   if(!hole||!h.stairs){polygon(out,h.poly,y,color,id);return}
+   const st=h.stairs,opening=[h.point(st.u-.73,st.start-.05),h.point(st.u+.73,st.start-.05),h.point(st.u+.73,st.end+.1),h.point(st.u-.73,st.end+.1)],points=[...h.poly,...opening];
+   for(const indices of T.ShapeUtils.triangulateShape(h.poly.map(p=>new T.Vector2(...p)),[opening.map(p=>new T.Vector2(...p))])){const q=indices.map(i=>[points[i][0],y,points[i][1]]);tri(out,...q,color,id,q.map(p=>[p[0]/3,p[2]/3]))}
+  };
+  for(let level=0;level<h.floorCount;level++){
+   const base=level*3.4,ceil=buffer();floorPolygon(floors,base+.055,level?0xb9a98e:0xc1ad91,level>0);floorPolygon(ceil,base+3.38,0xdbd4c2,level<h.floorCount-1);const ceiling=makeMesh(ceil,plainMat);g.add(ceiling);ceilings.push(ceiling);
+   const put=(u,y,v,w,ht,d,color)=>{
+    y+=base;const a=h.point(u-w/2,v-d/2),b=h.point(u+w/2,v-d/2),c=h.point(u+w/2,v+d/2),e=h.point(u-w/2,v+d/2);
+    quad(out,[a[0],y,a[1]],[b[0],y,b[1]],[b[0],y+ht,b[1]],[a[0],y+ht,a[1]],color,id);quad(out,[b[0],y,b[1]],[c[0],y,c[1]],[c[0],y+ht,c[1]],[b[0],y+ht,b[1]],color,id);quad(out,[c[0],y,c[1]],[e[0],y,e[1]],[e[0],y+ht,e[1]],[c[0],y+ht,c[1]],color,id);quad(out,[e[0],y,e[1]],[a[0],y,a[1]],[a[0],y+ht,a[1]],[e[0],y+ht,e[1]],color,id);quad(out,[a[0],y+ht,a[1]],[b[0],y+ht,b[1]],[c[0],y+ht,c[1]],[e[0],y+ht,e[1]],color,id);
+   };
+   const segments=level?h.poly.map((a,i)=>({a,b:h.poly[(i+1)%h.poly.length]})):h.segments;
+   for(const seg of segments){const dx=seg.b[0]-seg.a[0],dz=seg.b[1]-seg.a[1],len=Math.hypot(dx,dz),sg=pointSign(h.poly),nx=-dz/len*.035*sg,nz=dx/len*.035*sg;quad(out,[seg.a[0]+nx,base+.12,seg.a[1]+nz],[seg.b[0]+nx,base+.12,seg.b[1]+nz],[seg.b[0]+nx,base+3.35,seg.b[1]+nz],[seg.a[0]+nx,base+3.35,seg.a[1]+nz],level?0xb8c1b1:0xd0c3ab,id)}
+   for(const seg of h.partitions)quad(out,[seg.a[0],base,seg.a[1]],[seg.b[0],base,seg.b[1]],[seg.b[0],base+3.35,seg.b[1]],[seg.a[0],base+3.35,seg.a[1]],level?0xb4bfc0:0xb7b5a4,id);
+   for(const f of housing.floorFurniture(h,level)){
+    if(f.kind==='bed'){put(f.u,.12,f.v,f.w,.35,f.d,0x66533d);put(f.u,.47,f.v,f.w,.2,f.d,0xd6cebb);put(f.u,.68,f.v+.3,f.w,.05,f.d*.65,0x6a8278);put(f.u,.69,f.v-f.d*.32,f.w*.7,.15,.45,0xe0d7c3)}
+    else if(f.kind==='sofa'){put(f.u,.05,f.v,f.w,.42,f.d,0x526e65);put(f.u,.45,f.v+.28,f.w,.55,.2,0x435b51);for(const side of[-1,1])put(f.u+side*(f.w/2-.1),.42,f.v,.2,.28,f.d,0x4e665b)}
+    else if(f.kind==='kitchen'||f.kind==='washbasin'){put(f.u,.05,f.v,f.w,.85,f.d,0x7e8a82);put(f.u,.9,f.v,f.w,.08,f.d,0xc3beb0);put(f.u,.99,f.v,.55,.02,.45,f.kind==='washbasin'?0xdbded7:0x383d3d)}
+    else if(f.kind==='desk'){put(f.u,.72,f.v,f.w,.1,f.d,0x987e5a);for(const side of[-1,1])put(f.u+side*(f.w/2-.12),.05,f.v,.1,.67,f.d*.75,0x5b665d)}
+    else{put(f.u,.05,f.v,f.w,1.7,f.d,0x7b6046);put(f.u,1.4,f.v-f.d/2-.02,f.w*.8,.04,.04,0xc0b18c)}
+   }
+   if(h.stairs&&level<h.floorCount-1){const st=h.stairs;for(let i=0;i<17;i++){const v=st.start+(i+.5)*(st.end-st.start)/17,ht=(i+1)*3.4/17;put(st.u,.06,v,st.width,ht-.06,(st.end-st.start)/17+.015,i%2?0x897255:0x998164)}for(const side of[-1,1])for(let i=0;i<5;i++){const t=i/4;put(st.u+side*(st.width/2+.04),t*3.4,st.start+t*(st.end-st.start),.065,.95,.065,0x494e45)}
+    const a=h.point(st.u-st.width/2-.04,st.start),b=h.point(st.u-st.width/2-.04,st.end);quad(out,[a[0],base+.9,a[1]],[b[0],base+4.3,b[1]],[b[0],base+4.37,b[1]],[a[0],base+.97,a[1]],0x50594a,id);
+    put(st.u,.07,st.start-.55,st.width*.7,.025,.2,0xc5a16a);
+   }
+  }
+  g.add(makeMesh(floors,floorMat),makeMesh(out,plainMat));
+  const d=h.door,pivot=new T.Group();pivot.position.set(d.x-d.ux*d.width/2,0,d.z-d.uz*d.width/2);pivot.rotation.y=Math.atan2(-d.uz,d.ux);g.add(pivot);const leaf=new T.Mesh(boxGeometry,doorMaterial);leaf.scale.set(d.width,2.58,.1);leaf.position.set(d.width/2,1.29,0);pivot.add(leaf);const handle=new T.Mesh(boxGeometry,handleMaterial);handle.scale.set(.15,.06,.18);handle.position.set(d.width-.18,1.1,0);pivot.add(handle);g.updateMatrixWorld(true);return{h,g,pivot,ceilings,baseAngle:pivot.rotation.y,stamp:0};
  }
- let last=-Infinity,current=null;
- function update(position,third,now){current=housing.insideHouse(position.x,position.z);activeId.value=third&&current?current.renderId:-1;cutHeight.value=third?3.1:1000;
-  if(now-last>200){last=now;for(const h of housing.near(position.x,position.z,65)){if(h.enterable&&Math.hypot(h.x-position.x,h.z-position.z)<65+Math.max(h.w,h.d)){if(!loaded.has(h.id))loaded.set(h.id,interior(h));loaded.get(h.id).stamp=now}}
+ let last=-Infinity,current=null,doorHealth={};
+ function update(position,third,now,actor={}){
+  current=housing.insideHouse(position.x,position.z);const level=actor.floor||0;activeId.value=third&&current?current.renderId:-1;cutHeight.value=third?level*3.4+3.1:1000;
+  if(now-last>200){last=now;const wanted=housing.near(position.x,position.z,45).filter(h=>h.enterable&&Math.hypot(h.x-position.x,h.z-position.z)<45+Math.max(h.w,h.d)).sort((a,b)=>a.id===current?.id?-1:b.id===current?.id?1:Math.hypot(a.x-position.x,a.z-position.z)-Math.hypot(b.x-position.x,b.z-position.z));let budget=3;
+   for(const h of wanted){if(!loaded.has(h.id)&&budget-->0)loaded.set(h.id,interior(h));if(loaded.has(h.id))loaded.get(h.id).stamp=now}
    for(const[id,v]of loaded)if(now-v.stamp>1500&&id!==current?.id){root.remove(v.g);v.g.traverse(o=>{if(o.geometry&&o.geometry!==boxGeometry)o.geometry.dispose()});loaded.delete(id)}
-   for(const m of sectorMeshes){const s=m.geometry.boundingSphere;m.visible=Math.hypot(s.center.x-position.x,s.center.z-position.z)<(window.DEAD_HORIZON_CONFIG?.viewDistance||700)+s.radius}}
-  for(const v of loaded.values()){v.pivot.rotation.y=v.baseAngle+(housing.isOpen(v.h)?-Math.PI*.52:0);v.ceiling.visible=!(third&&current?.id===v.h.id)}root.updateMatrixWorld(true);
+   for(const m of sectorMeshes){const bound=m.geometry.boundingSphere;m.visible=Math.hypot(bound.center.x-position.x,bound.center.z-position.z)<(window.DEAD_HORIZON_CONFIG?.viewDistance||700)+bound.radius}
+  }
+  for(const v of loaded.values()){v.pivot.visible=doorHealth[v.h.id]!==0;v.pivot.rotation.y=v.baseAngle+(housing.isOpen(v.h)?-Math.PI*.52:0);v.ceilings.forEach((ceiling,i)=>ceiling.visible=!(third&&current?.id===v.h.id&&i>=level))}root.updateMatrixWorld(true);
  }
- return{update,reset(){housing.setDoors({})},current:()=>current,stats:()=>({loaded:loaded.size,sectors:sectorMeshes.length})};
+ return{update,setDoorHealth(value){doorHealth=value||{}},reset(){housing.setDoors({})},current:()=>current,stats:()=>({loaded:loaded.size,sectors:sectorMeshes.length})};
+
 }
 function pointSign(p){return p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0)>0?1:-1}
 function hyp(a,b){return Math.hypot(b[0]-a[0],b[1]-a[1])}
