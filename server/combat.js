@@ -10,7 +10,7 @@ export function createCombatService({housing,blocked,clearLine,gear,rules,announ
  const ai=createZombieAI({housing,blocked,clearLine,gear,hurt});
  const allowed=(p,now)=>p.hp>0&&!p.seated&&!(p.climbUntil>now)&&p.cool<=0&&!p.reload;
  function melee(world,p,now){
-  if(!allowed(p,now))return;const w=gear(p).weapon;p.angle=Number.isFinite(p.input?.yaw)?p.input.yaw:p.angle;p.cool=w.melee?w.interval:.7;
+  if(!allowed(p,now))return;p.lastAttack=now;p.lastAttackKind='melee';const w=gear(p).weapon;p.angle=Number.isFinite(p.input?.yaw)?p.input.yaw:p.angle;p.cool=w.melee?w.interval:.7;
   const stamina=p.stamina;p.stamina=Math.max(0,p.stamina-(w.melee?11:7));const level=Math.floor((p.xp?.melee||0)/25),strength=p.traits.includes('strong')?1.4:p.traits.includes('frail')?.6:1;
   const targets=world.zombies.filter(z=>z.hp>0&&sameLevel(p,z)&&distance(z,p)<(w.melee?2.8:2.1)&&Math.cos(Math.atan2(z.x-p.x,z.z-p.z)-p.angle)>.35&&clearLine(p,z)).sort((a,b)=>distance(a,p)-distance(b,p)).slice(0,w.id==='bat'||w.id==='axe'?2:1);
   for(const z of targets){damage(z,p,(w.melee?w.damage:.85)*strength*(stamina<10?.45:1)*(1+level*.035),world,now);const a=Math.atan2(z.x-p.x,z.z-p.z),nx=z.x+Math.sin(a)*.6,nz=z.z+Math.cos(a)*.6;if(!blocked(nx,nz,.38,{floor:floorOf(z),houseId:z.houseId})){z.x=nx;z.z=nz}xp(p,'melee',1)}
@@ -27,7 +27,7 @@ export function createCombatService({housing,blocked,clearLine,gear,rules,announ
   if(!allowed(p,now))return;const w=gear(p).weapon;if(w.id==='fists'||w.melee){melee(world,p,now);return}
   if(p.jammed){if(!p.jamWarned){announce(p,'Arme enrayée : appuie sur R pour la dégager.');p.jamWarned=true}return}
   if(p.ammo[p.slot]<=0){reload(p);return}
-  const item=rules.equipped(p,p.slot?'secondary':'primary');item.loaded=--p.ammo[p.slot];p.cool=w.interval;item.condition=Math.max(0,(item.condition??100)-.06);
+  p.lastAttack=now;p.lastAttackKind='gun';const item=rules.equipped(p,p.slot?'secondary':'primary');item.loaded=--p.ammo[p.slot];p.cool=w.interval;item.condition=Math.max(0,(item.condition??100)-.06);
   if(item.condition<20&&Math.random()<.035){item.jammed=true;p.jammed=true;}
   const level=Math.floor((p.xp?.firearms||0)/25),moving=!!(p.input?.x||p.input?.z),spread=Math.max(.008,(p.input?.aim?.022:.065)+(moving?.045:0)+(100-p.stamina)*.0005-level*.002);
   const angle=(Number.isFinite(p.input?.yaw)?p.input.yaw:p.angle)+(Math.random()-.5)*spread;p.angle=angle;const ux=Math.sin(angle),uz=Math.cos(angle);

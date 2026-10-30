@@ -1,3 +1,6 @@
+import {rebuildHumanoid} from './humanoid.js';
+import {buildWeaponModel,addFirstPersonArms,poseWeapon,disposeModel} from './weapon-model.js';
+import {SKIN_COLORS,normalizeAppearance} from './appearance.js';
 import * as T from './vendor/three.module.js';
 import {EXTRA_WEAPONS,EXTRA_ARMORS,CLOTHES,AMMUNITION,CALIBERS,configureWeapon} from './arsenal-catalog.js';
 import {setupExpandedEquipmentUI,renderAmmoInventory} from './arsenal-ui.js';
@@ -34,22 +37,11 @@ function gunIcon(w){const paths={pistol:'M70 28h95v14H96v30H80V44H70z',revolver:
 
 export function setupEquipmentUI(){setupExpandedEquipmentUI({WEAPONS,ARMORS,loadouts,gunIcon})}
 
-const mats=new Map();function meshBox(g,w,h,d,c,x,y,z){if(!mats.has(c))mats.set(c,new T.MeshStandardMaterial({color:c,roughness:.85}));const m=new T.Mesh(new T.BoxGeometry(w,h,d),mats.get(c));m.position.set(x,y,z);m.castShadow=true;g.add(m);return m}
-export function equipCharacter(p){if(p.equipment){p.g.remove(p.equipment);p.equipment.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material?.type==='MeshBasicMaterial')o.material.dispose()})}const w=p.weapon,a=p.armor,g=new T.Group();p.g.add(g);p.equipment=g;
- const outfit=p.clothing;for(const index of [0,5,6]){if(!mats.has(outfit.top))mats.set(outfit.top,new T.MeshStandardMaterial({color:outfit.top,roughness:.9}));p.g.children[index].material=mats.get(outfit.top)}for(const leg of p.legs){if(!mats.has(outfit.pants))mats.set(outfit.pants,new T.MeshStandardMaterial({color:outfit.pants,roughness:.9}));leg.material=mats.get(outfit.pants)}if(outfit.visibility<.9)for(const x of [-.44,.44])meshBox(g,.21,.12,.26,outfit.pants,x,1.25,.02);if(outfit.reserveBonus>=.3)meshBox(g,.6,.72,.36,outfit.pants,0,1.14,-.46);
- if(outfit.id==='hood'){meshBox(g,.53,.48,.15,outfit.top,0,1.88,-.22);meshBox(g,.57,.12,.45,outfit.top,0,2.13,-.02)}
- if(['rain','winter','nomad'].includes(outfit.id)){meshBox(g,.74,.58,.46,outfit.top,0,.66,0);for(const x of [-.33,.33])meshBox(g,.13,.7,.5,outfit.top,x,.8,0);meshBox(g,.1,.48,.48,outfit.pants,0,1.1,.02)}
- if(outfit.id==='fire'){for(const x of [-.47,.47])meshBox(g,.22,.12,.28,0xc4bd68,x,1.05,0);for(const x of [-.2,.2])meshBox(g,.25,.1,.31,0xc4bd68,x,.3,0);meshBox(g,.72,.09,.46,0xc4bd68,0,.8,0)}
- if(outfit.id==='medic'){meshBox(g,.2,.06,.28,0xb44d3e,-.47,1.3,.04);meshBox(g,.07,.19,.28,0xb44d3e,-.47,1.3,.04)}
- if(outfit.id==='ghillie'){for(let i=0;i<10;i++)meshBox(g,.16,.23,.16,i%2?outfit.pants:0x818954,(i%3-1)*.28,.7+(i%4)*.24,i%2?.32:-.3)}
- if(outfit.id==='work'||outfit.id==='cargo')for(const x of [-.36,.36])meshBox(g,.16,.23,.2,outfit.pants,x,.63,.13);
- meshBox(g,.23,.1,.28,p.id?0x78a5ae:0xcb8852,-.47,1.4,0);
- if(a.reduction){meshBox(g,.77,.72,.55,a.color,0,1.12,0);for(const x of [-.25,0,.25])meshBox(g,.16,.25,.13,0x4a5542,x,1.05,.33);for(const x of [-.32,.32])meshBox(g,.12,.2,.5,a.color,x,1.54,0);meshBox(g,.5,.6,.22,0x414d3b,0,1.12,-.38)}
- if(a.helmet){meshBox(g,.58,.21,.57,a.color,0,2.02,0);meshBox(g,.6,.15,.62,a.color,0,1.91,0);if(a.visor)meshBox(g,.5,.28,.07,0x77939a,0,1.83,.35)}
- if(a.heavy){for(const x of [-.42,.42])meshBox(g,.22,.4,.5,a.color,x,1.42,0);for(const x of [-.2,.2])meshBox(g,.25,.6,.38,a.color,x,.42,.08)}
- const weapon=new T.Group();weapon.position.set(.42,1.15,.35);g.add(weapon);p.gunModel=weapon;if(w.melee){meshBox(weapon,.09,.09,w.id==='knife'?.4:1.05,0x83613e,0,0,.4);if(w.id==='axe')meshBox(weapon,.5,.08,.24,0x9baba5,.16,0,.92);if(w.id==='knife')meshBox(weapon,.04,.08,.25,0x9baba5,0,0,.3);p.flash=new T.Object3D();p.flash.visible=false;return}if(w.id==='fists'){p.flash=new T.Object3D();p.flash.visible=false;return}const pistol=['pistol','revolver'].includes(w.shape),length=(pistol?.42:w.shape==='smg'?.7:w.shape==='bullpup'?.72:w.shape==='marksman'?1.45:w.shape==='lmg'?1.3:w.shape==='shotgun'?1.25:1.13)*(1+(w.id.split('').reduce((v,c)=>v+c.charCodeAt(0),0)%5-2)*.025);
- meshBox(weapon,.13,.13,length,w.color,0,0,length/2);meshBox(weapon,.09,.25,.12,0x303b34,0,-.12,.18);if(!pistol){meshBox(weapon,.15,.12,.35,w.color,0,-.01,-.16);meshBox(weapon,.1,.28,w.shape==='lmg'?.25:.14,w.shape==='lmg'?0x6b7350:0x343d32,0,-.2,.4);meshBox(weapon,.06,.07,length*.5,0x282f2a,0,.1,length*.5)}if(w.shape==='revolver'){const drum=new T.Mesh(new T.CylinderGeometry(.11,.11,.17,10),mats.get(0x303b34));drum.rotation.z=Math.PI/2;drum.position.set(0,-.03,.18);weapon.add(drum)}if(w.mods?.muzzle==='suppressor'){const suppressor=new T.Mesh(new T.CylinderGeometry(.075,.075,.4,10),mats.get(0x303b34));suppressor.rotation.x=Math.PI/2;suppressor.position.set(0,0,length+.2);weapon.add(suppressor)}if(w.mods?.muzzle==='brake')meshBox(weapon,.17,.16,.17,0x303b34,0,0,length+.08);if(w.mods?.muzzle==='choke')meshBox(weapon,.15,.15,.2,0x303b34,0,0,length+.1);if(w.mods?.optic&&w.mods.optic!=='none')meshBox(weapon,.13,w.mods.optic.startsWith('scope')?.15:.1,w.mods.optic==='scope8'?.5:.27,0x303b34,0,.2,.35);if(w.mods?.grip&&w.mods.grip!=='none')meshBox(weapon,.09,.24,.12,0x303b34,0,-.18,length*.7);if(w.mods?.magazine==='extended')meshBox(weapon,.12,.45,.17,0x303b34,0,-.24,.4);if(w.mods?.magazine==='drum')meshBox(weapon,.35,.3,.24,0x303b34,0,-.22,.4);if(w.mods?.stock&&w.mods.stock!=='none')meshBox(weapon,.15,.18,.28,w.mods.stock==='light'?0x606c5c:0x303b34,0,0,-.3);
- const flash=new T.Mesh(new T.OctahedronGeometry(.16),new T.MeshBasicMaterial({color:0xffdb83}));flash.position.set(0,0,length+.04+(w.mods?.muzzle==='suppressor'?.4:0));if(w.mods?.muzzle==='suppressor')flash.scale.setScalar(.3);flash.visible=false;weapon.add(flash);p.flash=flash;
+export function equipCharacter(p){
+ if(p.equipment){p.g.remove(p.equipment);disposeModel(p.equipment)}
+ rebuildHumanoid(p,{outfit:p.clothing,armor:p.armor,backpack:p.hasBackpack});
+ const g=new T.Group();p.g.add(g);p.equipment=g;const weapon=buildWeaponModel(p.weapon);g.add(weapon);p.gunModel=weapon;p.flash=weapon.userData.flash;
+ p.firstPersonArms=addFirstPersonArms(weapon,SKIN_COLORS[normalizeAppearance(p.appearance).skin],p.clothing.top);poseWeapon(p,{time:0});
 }
 export function createCombat({scene,zombies,obstacles,toast,isBlocked}){const effects=[],ammoStock={};function clearLine(a,b){const d=a.distanceTo(b),steps=Math.ceil(d/.8);for(let i=1;i<steps;i++){const x=T.MathUtils.lerp(a.x,b.x,i/steps),z=T.MathUtils.lerp(a.z,b.z,i/steps);if(isBlocked?isBlocked(x,z):obstacles.some(o=>Math.abs(x-o.x)<o.w-.5&&Math.abs(z-o.z)<o.d-.5))return false}return true}
  function down(z,p,damage){z.hp-=damage;if(z.hp<=0){z.alive=false;z.g.visible=false;p.kills++}}

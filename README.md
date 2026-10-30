@@ -23,6 +23,10 @@ Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le compo
 - Ressources persistantes et limitées, à fouiller puis à transporter. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
 - Comptes avec identifiant et mot de passe, connexion mémorisée au choix pendant 30 jours. Un seul personnage vivant par compte ; nom, apparence, inventaire et progression conservés sur le serveur. Mort définitive : création d’un nouveau personnage. Pas de chat ni de serveur privé.
 
+## Personnages et armes 5.1
+
+Humains et zombies articulés, visages et vêtements détaillés. Les 76 armes utilisent des modèles distincts par famille avec accessoires équipés visibles, bras en première personne, recul et rechargement animés. Les modèles sont construits et regroupés par matériau, avec géométrie partagée pour les infectés de même apparence.
+
 ## Commandes
 
 ZQSD / WASD : marcher ou conduire · E : ouvrir ou fermer une porte / fouiller / monter / descendre · Espace : tirer · R : recharger · F : mêlée · X : arme secondaire · T : munition · I : inventaire · M : carte · F5 : vue.
