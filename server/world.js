@@ -16,19 +16,19 @@ export function createWorldService({map,catalog,configureWeapon,clothes,ammuniti
  const lineDist=(x,z,a,b)=>{const dx=b[0]-a[0],dz=b[1]-a[1],t=clamp(((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz||1),0,1);return Math.hypot(x-a[0]-dx*t,z-a[1]-dz*t)};
  for(const b of map.buildings){const xs=b.p.map(p=>p[0]),zs=b.p.map(p=>p[1]);for(let x=Math.floor(Math.min(...xs)/CELL);x<=Math.floor(Math.max(...xs)/CELL);x++)for(let z=Math.floor(Math.min(...zs)/CELL);z<=Math.floor(Math.max(...zs)/CELL);z++){const key=x+':'+z;if(!grid.has(key))grid.set(key,[]);grid.get(key).push(b.p)}}
  const blocked=(x,z,r=.55,options)=>housing.blocked(x,z,r,options);
- function free(x,z,r=.8){if(!blocked(x,z,r))return{x,z};for(let d=2;d<80;d+=2)for(let i=0;i<24;i++){const a=i*Math.PI/12,nx=x+Math.cos(a)*d,nz=z+Math.sin(a)*d;if(!blocked(nx,nz,r))return{x:nx,z:nz}}return{x:map.spawn[0],z:map.spawn[1]}}
+ function free(x,z,r=.8,options){if(!blocked(x,z,r,options))return{x,z};for(let d=2;d<80;d+=2)for(let i=0;i<24;i++){const a=i*Math.PI/12,nx=x+Math.cos(a)*d,nz=z+Math.sin(a)*d;if(!blocked(nx,nz,r,options))return{x:nx,z:nz}}return{x:map.spawn[0],z:map.spawn[1]}}
  const spawn=free(...map.spawn,4),roads=map.roads.filter(r=>!['footway','path','steps','cycleway'].includes(r.k)).flatMap(r=>r.p.slice(1).map((b,i)=>({x:(r.p[i][0]+b[0])/2,z:(r.p[i][1]+b[1])/2}))).filter(p=>Math.abs(p.x)<2000&&Math.abs(p.z)<1850&&!blocked(p.x,p.z,1));
  const survival=createSurvivalWorld({catalog,clothes,ammunition,mods:MODS,compatibleMods,housing,roads,free,clearLine});
  const construction=createConstruction({housing,rules:survival.rules,announce:survival.announce,drop:survival.drop});
  const combat=createCombatService({housing,blocked,clearLine,gear,rules:survival.rules,announce:survival.announce});
  function migrateExploration(world){
-  if(world.explorationVersion===1)return;
-  for(const actor of [...world.players,...Object.values(world.characters||{}).map(c=>c.state),...world.zombies,...Object.values(world.piles||{})]){
+  if(world.explorationVersion===2)return;
+  for(const actor of [...world.players,...Object.values(world.characters||{}).map(c=>c.state),...world.zombies,...(world.vehicles||[]),...Object.values(world.piles||{})]){
    if(!actor||!Number.isFinite(actor.x)||!Number.isFinite(actor.z))continue;
    actor.floor||=0;if(!housing.validLevel(actor)){actor.floor=0;actor.houseId=null}
-   if(blocked(actor.x,actor.z,.55,{floor:floorOf(actor),houseId:actor.houseId})){actor.floor=0;actor.houseId=null;Object.assign(actor,free(actor.x,actor.z))}
+   const vehicle=world.vehicles?.includes(actor),radius=vehicle?1.4:.55;if(blocked(actor.x,actor.z,radius,{floor:floorOf(actor),houseId:actor.houseId,vehicle})){actor.floor=0;actor.houseId=null;Object.assign(actor,free(actor.x,actor.z,radius,{vehicle}))}
   }
-  world.explorationVersion=1;
+  world.explorationVersion=2;
  }
  function initial(now){let seed=1993;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};const loot=[];for(let i=0;i<84;i++){const p=roads[Math.floor(random()*roads.length)];loot.push({...free(p.x+5,p.z+4),type:['part','ammo','food','fuel'][i%4],taken:0})}for(const poi of map.landmarks)for(let i=0;i<4;i++)loot.push({...free(poi.p[0]+30+i*2,poi.p[1]-20),type:['ammo','food','part','fuel'][i],taken:0});for(const[dx,dz,type]of[[-5,8,'ammo'],[-9,8,'part'],[-13,8,'part'],[-17,8,'part'],[6,8,'fuel'],[6,11,'food']])loot.push({...free(spawn.x+dx,spawn.z+dz),type,taken:0,starter:true});const zombies=Array.from({length:140},(_,id)=>{const p=roads[Math.floor(random()*roads.length)],point=dist(p,spawn)>55?p:free(spawn.x+80+id,spawn.z+20);return{id,...point,hp:2,deadAt:0,alert:0,angle:0}});loot.push(...housing.lootPoints().map(l=>({...l,taken:0})));return{housingVersion:HOUSING_VERSION,doors:{},clock:now,players:[],loot,zombies,car:{...spawn,angle:0,speed:0,fuel:65,parts:0,driver:null,spec:catalog.vehicles[0].id},shots:[],events:[]}}
  function config(){return{weapon:'fists',secondary:'fists',armor:'civil',clothing:'civil',ammo:'standard'}}
