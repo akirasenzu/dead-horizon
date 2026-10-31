@@ -23,6 +23,17 @@ Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le compo
 - Ressources persistantes et limitées, à fouiller puis à transporter. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
 - Comptes avec identifiant et mot de passe, connexion mémorisée au choix pendant 30 jours. Un seul personnage vivant par compte ; nom, apparence, inventaire et progression conservés sur le serveur. Mort définitive : création d’un nouveau personnage. Pas de chat ni de serveur privé.
 
+## Mécanique des véhicules 5.3
+
+À pied, près d’un véhicule, ouvre **I**. Coupe le moteur, fais sortir les occupants et ouvre le capot pour atteindre moteur, radiateur et batterie. Chaque pièce se démonte ou se répare après une intervention chronométrée avec les outils nécessaires. Les éléments retirés sont déposés au sol et peuvent être remontés depuis le sol sans les porter. Le montage exige une pièce compatible. Une seule intervention peut être effectuée à la fois par véhicule.
+
+- Moteur et radiateur : caisse à outils. Batterie et portes : tournevis.
+- Roues : cric et clé démonte-roue. Pneus **route**, **course**, **rallye** et **tout-terrain**, avec sculptures et comportement différents sur asphalte et terre.
+- Sans moteur, batterie utilisable ou roue, pas de conduite. Sans radiateur ou liquide, le moteur surchauffe et s’endommage. Les composants ont leur propre état ; la charge de la batterie est conservée.
+- Réparation d’un composant : pièce mécanique et caisse à outils. Eau du radiateur : bouteille d’eau, moteur refroidi.
+
+La migration conserve véhicules, carburant, inventaires et objets déjà fouillés. Les composants ne sont créés qu’une fois pour les anciens véhicules ; un élément démonté reste absent après reconnexion. Les opérations et changements de pneus sont partagés entre les joueurs.
+
 ## Ville et véhicules 5.2
 
 Façades texturées, fenêtres vitrées avec ouvertures réelles, encadrements, appuis, corniches et toits détaillés. Les rideaux, stores, gouttières, descentes d’eau et cheminées sont construits à proximité du joueur. Les fenêtres restent des limites de collision : l’entrée se fait toujours par les portes.

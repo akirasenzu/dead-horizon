@@ -73,8 +73,9 @@ export function createSurvivalRules({catalog,clothes,ammunition,mods,compatibleM
  function randomBag(seed,kind='home'){
   let n=Array.from(String(seed)).reduce((a,c)=>Math.imul(a^c.charCodeAt(0),16777619)>>>0,2166136261);const random=()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
   const choose=list=>list[Math.floor(random()*list.length)],items=[];
-  const basics=kind==='car'?['rags','screwdriver','part','crackers','water']:kind==='work'?['toolkit','part','fuel','crowbar','screwdriver','rags','weapon:axe']:['beans','crackers','apple','water','bandage','rags','backpack','emptyBottle','weapon:bat','weapon:knife'];
+  const basics=kind==='car'?['rags','screwdriver','part','crackers','water']:kind==='work'?['toolkit','part','fuel','crowbar','screwdriver','jack','lugWrench','rags','weapon:axe']:['beans','crackers','apple','water','bandage','rags','backpack','emptyBottle','weapon:bat','weapon:knife'];
   for(let j=0;j<2+Math.floor(random()*3);j++)items.push(item(choose(basics),1));
+  if(random()<(kind==='work'?.52:kind==='car'?.18:0)){const type=choose(['engine','radiator','battery','wheel']),tyre=choose(['road','race','rally','offroad']),fit=choose(['car','car','utility','heavy']);if(def('vpart:'+type+(type==='wheel'?':'+tyre:'')))items.push(item('vpart:'+type+(type==='wheel'?':'+tyre:''),1,{condition:35+Math.floor(random()*61),fit,...(type==='battery'?{charge:35+Math.floor(random()*61)}:{})}))}
   if(random()<.32)items.push(item('clothes:'+choose(clothes).id));
   if(random()<(kind==='work'?.48:.16)){const w=choose(catalog.weapons.filter(w=>w.id!=='fists'));items.push(item('weapon:'+w.id,1,{condition:40+Math.floor(random()*61)}));const ammo=ammunition.filter(a=>a.caliber===w.caliberId);if(ammo.length)items.push(item('ammo:'+choose(ammo).key,6+Math.floor(random()*25)))}
   if(random()<.12)items.push(item('armor:'+choose(catalog.armors.filter(a=>a.id!=='civil')).id,1,{condition:40+Math.floor(random()*40)}));

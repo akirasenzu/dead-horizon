@@ -25,4 +25,4 @@ export class ModelBatch{
 }
 export const modelMaterials={cloth:new T.MeshStandardMaterial({vertexColors:true,roughness:.94,side:T.DoubleSide}),metal:new T.MeshStandardMaterial({vertexColors:true,roughness:.48,metalness:.5,side:T.DoubleSide}),polymer:new T.MeshStandardMaterial({vertexColors:true,roughness:.82,metalness:.03,side:T.DoubleSide})};
 export function shade(color,amount){return new T.Color(color).multiplyScalar(amount).getHex()}
-export function disposeModel(root){root?.traverse(o=>{if(o.geometry&&!o.geometry.userData.shared)o.geometry.dispose();if(o.material?.userData.owned)o.material.dispose()})}
+export function disposeModel(root){root?.traverse(o=>{if(o.geometry&&!o.geometry.userData.shared)o.geometry.dispose();if(o.material?.userData.owned)o.material.dispose();if(o.customDepthMaterial?.userData.owned)o.customDepthMaterial.dispose()})}

@@ -1,3 +1,4 @@
+import {prepareVehicleService} from './vehicle-service-view.js';
 import {supportsDetailedVehicle,buildDetailedVehicle,enhanceLegacyVehicle} from './vehicle-model.js';
 import * as T from './vendor/three.module.js';
 import {ROAD_VEHICLES,buildRoadVehicle} from './road-vehicles.js';
@@ -31,4 +32,4 @@ function buildLegacyVehicle(spec){if(spec.source==='ki5')return buildKI5Vehicle(
  root.userData.wheels=wheels;root.userData.spec=spec;return root;
 }
 
-export function buildVehicle(spec){return supportsDetailedVehicle(spec)?buildDetailedVehicle(spec):enhanceLegacyVehicle(buildLegacyVehicle(spec),spec)}
+export function buildVehicle(spec){return prepareVehicleService(supportsDetailedVehicle(spec)?buildDetailedVehicle(spec):enhanceLegacyVehicle(buildLegacyVehicle(spec),spec),spec)}

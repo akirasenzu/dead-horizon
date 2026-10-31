@@ -15,10 +15,10 @@ function loft(batch,sections,color){ // [z, half width, bottom, shoulder, crown]
  for(const index of[0,sections.length-1]){const p=points(sections[index]);for(let i=1;i<p.length-1;i++)quad(batch,p[0],p[i],p[i+1],p[i+1],color)}
 }
 function soften(mesh){const g=mesh.geometry,p=g.attributes.position,n=g.attributes.normal,groups=new Map();for(let i=0;i<p.count;i++){const key=[p.getX(i),p.getY(i),p.getZ(i)].map(v=>v.toFixed(5)).join(',');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(i)}const before=n.array.slice();for(const ids of groups.values())for(const i of ids){const v=new T.Vector3(before[i*3],before[i*3+1],before[i*3+2]),sum=new T.Vector3();for(const j of ids){const other=new T.Vector3(before[j*3],before[j*3+1],before[j*3+2]);if(v.dot(other)>.62)sum.add(other)}sum.normalize();n.setXYZ(i,sum.x,sum.y,sum.z)}n.needsUpdate=true}
-export function detailedWheel(radius=.55,width=.4,offroad=false){
+export function detailedWheel(radius=.55,width=.4,offroad=false,tyre='road'){
  const g=new T.Group(),rubber=new ModelBatch(),metal=new ModelBatch();
  const points=[new T.Vector2(radius*.52,-width*.5),new T.Vector2(radius*.8,-width*.54),new T.Vector2(radius*.96,-width*.37),new T.Vector2(radius,-width*.21),new T.Vector2(radius,width*.21),new T.Vector2(radius*.96,width*.37),new T.Vector2(radius*.8,width*.54),new T.Vector2(radius*.52,width*.5)];const tire=new T.LatheGeometry(points,28);tire.rotateZ(Math.PI/2);rubber.add(tire,black);
- for(let i=0;i<28;i++){const a=i*Math.PI/14;for(const side of[-1,1])rubber.box(width*.45,offroad?.025:.012,offroad?.12:.028,0x353a35,side*width*.24,Math.cos(a)*(radius+.004),Math.sin(a)*(radius+.004),a,0,side*.18)}
+ for(let i=0;i<(tyre==='race'?0:32);i++){const a=i*Math.PI/16;for(const side of[-1,1])rubber.box(width*.45,tyre==='offroad'?.035:tyre==='rally'?.022:.01,tyre==='offroad'?.13:tyre==='rally'?.07:.025,0x353a35,side*width*.24,Math.cos(a)*(radius+.004),Math.sin(a)*(radius+.004),a,0,side*(tyre==='rally'?.48:tyre==='offroad'?.3:.08))}if(tyre==='race')for(const side of[-1,1])rubber.ring(radius-.003,.007,0x111a15,side*width*.23,0,0,'x');
  metal.tube(radius*.51,radius*.51,width*.78,0x59615c,0,0,0,'x',20);
  for(const side of[-1,1]){metal.ring(radius*.52,.027,chrome,side*width*.49,0,0,'x');metal.tube(radius*.17,radius*.17,.035,chrome,side*width*.51,0,0,'x',12);for(let i=0;i<5;i++){const a=i*Math.PI*2/5;bar(metal,[side*width*.5,Math.cos(a)*radius*.18,Math.sin(a)*radius*.18],[side*width*.49,Math.cos(a+.1)*radius*.48,Math.sin(a+.1)*radius*.48],.035,0x9ca39d);metal.tube(.018,.018,.04,0xd2d2be,side*width*.53,Math.cos(a)*radius*.11,Math.sin(a)*radius*.11,'x',6)}}
  const t=rubber.mesh(materials.rubber),m=metal.mesh(materials.metal);soften(t);soften(m);g.add(t,m);g.userData.radius=radius;g.userData.detailed=true;return g;
@@ -31,13 +31,13 @@ export function buildDetailedVehicle(s){
  const frontBase=van?L*.38:pickup?L*.27:sport?L*.16:muscle?L*.115:L*.22,rearBase=van?-L*.45:pickup?-L*.065:hatch||long||suv?-L*.4:muscle?-L*.3:-L*.28,frontTop=frontBase-(van?.19:sport?.68:muscle?.56:.53),rearTop=rearBase+(rounded?.5:.36),roofW=half*(van?.88:sport?.73:.8);
  interior.box(W*.82,.14,L*.85,black,0,lower-.08,0);for(const z of[-axle,axle])bar(metal,[-half,.55,z],[half,.55,z],.06,trim);
  // Curved shoulders and real arch cut-outs instead of a rectangular body through the wheels.
- loft(paint,[[-L*.5,half*.86,belt-.13,belt-.06,belt+.015],[-L*.44,half*.98,belt-.15,belt+.02,belt+.06],[rearBase,half,belt-.16,belt+.02,belt+.07],[frontBase,half,belt-.16,belt+.02,belt+.07],[L*.43,half*.96,belt-.16,belt-.01,belt+.035],[L*.5,half*.85,belt-.18,belt-.08,belt-.025]],C);
+ const bodySections=[[-L*.5,half*.86,belt-.13,belt-.06,belt+.015],[-L*.44,half*.98,belt-.15,belt+.02,belt+.06],[rearBase,half,belt-.16,belt+.02,belt+.07],[frontBase,half,belt-.16,belt+.02,belt+.07],[L*.43,half*.96,belt-.16,belt-.01,belt+.035],[L*.5,half*.85,belt-.18,belt-.08,belt-.025]];loft(paint,bodySections.filter(p=>p[0]<=rearBase),C);loft(paint,bodySections.filter(p=>p[0]>=frontBase),C);
  for(const side of[-1,1]){
   const outline=[[-L/2,lower],[-axle-r*1.1,lower]];
   for(const z of[-axle,axle]){if(z>0)outline.push([z-r*1.1,lower]);for(let i=0;i<=12;i++){const a=Math.PI-i*Math.PI/12;outline.push([z+Math.cos(a)*r*1.1,r+Math.sin(a)*r*1.12])}outline.push([z+r*1.1,lower])}
   outline.push([L/2,lower],[L/2,belt-.06],[L*.43,belt+.01],[-L*.43,belt+.01],[-L/2,belt-.06]);paint.profile(outline,.055,C,side*(half-.055));
   for(const z of[-axle,axle])for(let i=0;i<15;i++){const a=Math.PI*i/15,b=Math.PI*(i+1)/15;bar(rubber,[side*(half-.005),r+Math.sin(a)*r*1.1,z+Math.cos(a)*r*1.1],[side*(half-.005),r+Math.sin(b)*r*1.1,z+Math.cos(b)*r*1.1],offroad?.045:.018,trim)}
-  const x=side*(half+.07);for(const z of[-axle,axle]){const wheel=detailedWheel(r,offroad?.46:.39,offroad);wheel.position.set(x,r,z);root.add(wheel);wheels.push(wheel)}
+  paint.box(.08,.14,frontBase-rearBase,C,side*(half-.055),belt+.065,(frontBase+rearBase)/2);const x=side*(half+.07);for(const z of[-axle,axle]){const wheel=detailedWheel(r,offroad?.46:.39,offroad);wheel.position.set(x,r,z);root.add(wheel);wheels.push(wheel)}
   bar(metal,[side*(half-.02),lower+.12,-axle+r*1.2],[side*(half-.02),lower+.12,axle-r*1.2],.025,chrome);
  }
  // The cab is empty: individual glass panes, pillars, curved roof and visible upholstery.
@@ -91,6 +91,6 @@ export function enhanceLegacyVehicle(root,s){ // Keep specialist silhouettes whi
  const wheels=root.userData.wheels||[],fixed=new ModelBatch();root.updateMatrixWorld(true);
  const meshes=[];root.traverse(o=>{if(o.isMesh&&!wheels.some(w=>{let p=o;while(p){if(p===w)return true;p=p.parent}return false}))meshes.push(o)});
  for(const mesh of meshes){const g=mesh.geometry.clone().applyMatrix4(mesh.matrixWorld);fixed.add(g,mesh.material.color?.getHex()||s.color);mesh.parent.remove(mesh);mesh.geometry.dispose()}
- const body=fixed.mesh(materials.paint);root.add(body);for(const wheel of wheels){const radius=wheel.children.find(c=>c.geometry?.parameters.radiusTop)?.geometry.parameters.radiusTop||.6;for(const c of[...wheel.children]){wheel.remove(c);c.geometry?.dispose()}const model=detailedWheel(radius,.4,['tractor','armored','truck','recovery'].includes(s.shape));wheel.add(...[...model.children]);wheel.userData.detailed=true}
+ const body=fixed.mesh(materials.paint);root.add(body);for(const wheel of wheels){const radius=wheel.children.find(c=>c.geometry?.parameters.radiusTop)?.geometry.parameters.radiusTop||.6;for(const c of[...wheel.children]){wheel.remove(c);c.geometry?.dispose()}const model=detailedWheel(radius,.4,['tractor','armored','truck','recovery'].includes(s.shape));wheel.add(...[...model.children]);wheel.userData.detailed=true;wheel.userData.radius=radius}
  root.userData.modelVersion=3;root.userData.family=s.shape;return root;
 }

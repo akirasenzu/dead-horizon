@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>DeadHorizon</AssemblyName>
     <RootNamespace>DeadHorizon</RootNamespace>
-    <Version>5.2.0</Version>
+    <Version>5.3.0</Version>
     <Product>Dead Horizon Launcher</Product>
     <Description>Dead Horizon — Survie, lanceur Windows autonome</Description>
     <PublishSingleFile>true</PublishSingleFile>

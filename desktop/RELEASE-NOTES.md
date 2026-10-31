@@ -1,12 +1,13 @@
-# Dead Horizon PC — Ville et véhicules 5.2
+# Dead Horizon PC — Mécanique des véhicules 5.3
 
-- Façades en briques ou enduit avec relief discret, encadrements, appuis et traverses. Les fenêtres sont de vraies ouvertures vitrées : les murs intérieurs correspondent aux ouvertures extérieures.
-- Détails chargés autour du joueur : gouttières, descentes d’eau, cheminées, rideaux, stores et certains volets. Portes à panneaux et boîtes aux lettres.
-- Toitures texturées, arêtiers et corniches ; matériaux détaillés aussi sur les bâtiments non accessibles.
-- Voitures remodelées par famille : berlines, coupés, sportives, compactes, classiques, fourgons, 4×4 et pick-up. Carrosseries galbées, passages de roue, jantes, pneus, phares, essuie-glaces, rétroviseurs, joints et usure.
-- Habitacles visibles avec sièges, tableau de bord, compteurs, volant et levier. La vue au volant utilise cet habitacle sur les véhicules remodelés.
-- Les 174 véhicules gardent leur identité et leurs réglages. Les véhicules spéciaux conservent leurs silhouettes avec roues détaillées et géométrie regroupée.
+- Démonte et remonte le moteur, le radiateur, la batterie, les portes et chaque roue. Les pièces récupérées conservent leur état, leur compatibilité et la charge de batterie.
+- Interventions chronométrées, accélérées pour les mécaniciens. Caisse à outils pour moteur/radiateur, tournevis pour batterie/portes, cric et clé démonte-roue pour les roues. Moteur coupé, véhicule immobile et sans occupants. Les travaux sont interrompus en cas de déplacement, attaque, perte des outils ou éloignement.
+- Pièces déposées au sol, visibles en 3D. Monte une pièce depuis ton inventaire ou depuis le sol à portée. Les opérations sont validées par le serveur, avec une seule intervention par véhicule.
+- Quatre profils de pneus : route, course, rallye, tout-terrain. Sculptures différentes, vitesse et adhérence adaptées à l’asphalte ou à la terre ; mélange de profils possible roue par roue.
+- Capot ouvrant, compartiment moteur visible, portes et roues absentes représentées sur le modèle.
+- Sans moteur, batterie utilisable ou roues, le véhicule ne roule pas. Un radiateur absent ou un circuit vide provoque la surchauffe et abîme le moteur. La batterie conserve sa charge et se recharge lorsque le moteur tourne.
+- Répare un composant avec une pièce mécanique et une caisse à outils ; remplis le circuit avec une bouteille d’eau lorsque le moteur a refroidi. Pièces et nouveaux outils se trouvent en fouillant, ou se récupèrent sur les véhicules existants.
 
-Les portes, les étages, les rangements, les personnages et les véhicules sauvegardés sont conservés. Aucun équipement gratuit au départ.
+Les véhicules et le monde existants sont conservés. Les composants sont ajoutés une seule fois aux anciennes sauvegardes, sans renouveler les ressources déjà fouillées. Aucun outil ou équipement gratuit au départ.
 
-Ferme puis relance ton lanceur pour recevoir la mise à jour automatiquement.
+À pied près du véhicule, ouvre I pour inspecter et intervenir. Ferme puis relance ton lanceur pour recevoir la mise à jour automatique.

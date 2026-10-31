@@ -76,3 +76,5 @@
 @media(max-height:780px) and (min-width:1051px){.creator-model canvas{height:245px}.character-creator #character-traits{max-height:295px}.character-creator .creator-start{margin-top:12px;padding-top:12px}.character-creator label{margin-top:8px}.character-creator .creator-model>p{margin-bottom:12px}}
 
 .mouse-lock-actions{display:flex;gap:8px;margin-top:12px}.mouse-lock-actions button{flex:1;font-size:9px;padding:11px 6px;letter-spacing:.5px}
+
+.vehicle-motor-status{font-size:11px;padding:10px;background:#b6c89c0c;border-left:2px solid #91a977}.vehicle-motor-status.critical{border-color:#dc9669}.mechanic-parts{max-height:340px;overflow:auto;margin-top:12px;border-top:1px solid #ffffff20}.mechanic-part{padding:11px 3px;border-bottom:1px solid #ffffff16}.mechanic-part strong{font-size:12px}.mechanic-part small{margin-top:4px;font-size:10px}.mechanic-progress{padding:10px;background:#d4a66914}.vehicle-inspection button:disabled{opacity:.35;cursor:wait}.tyre-guide{font-size:11px;margin:12px 0;color:#b7c1a9}.tyre-guide summary{cursor:pointer}
