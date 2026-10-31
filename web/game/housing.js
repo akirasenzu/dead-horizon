@@ -1,12 +1,14 @@
+import {attachConstruction} from './construction.js';
+import {buildingMetrics,STOREY_HEIGHT} from './building-metrics.js';
 import {addLevels} from './levels.js';
 // Shared deterministic layout: the browser and the authoritative server use
 // exactly the same footprints, door openings, partitions and furniture.
-export const CITY_SCALE=1.3,HOUSING_VERSION=1,FLOOR_HEIGHT=3.4;
+export const CITY_SCALE=1.3,HOUSING_VERSION=1,FLOOR_HEIGHT=STOREY_HEIGHT;
 export function prepareCityMap(raw){
  if(raw.gameScale===CITY_SCALE)return raw;
  const point=p=>p.map(v=>Math.round(v*CITY_SCALE*100)/100);
  return {...raw,gameScale:CITY_SCALE,spawn:point(raw.spawn),
-  buildings:raw.buildings.map(b=>({...b,p:b.p.map(point),h:Math.max(['garage','garages','service','roof'].includes(b.k)?3.2:7.6,b.h*1.23)})),
+  buildings:raw.buildings.map(b=>({...b,p:b.p.map(point),h:buildingMetrics(b).height})),
   roads:raw.roads.map(r=>({...r,p:r.p.map(point)})),rails:raw.rails.map(l=>l.map(point)),
   parks:raw.parks.map(p=>({...p,p:p.p.map(point)})),landmarks:raw.landmarks.map(p=>({...p,p:point(p.p)}))};
 }
@@ -47,6 +49,7 @@ export function createHousing(data){
   }
   for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];if(best&&i===best.edge){const left=[best.x-best.ux*best.width/2,best.z-best.uz*best.width/2],right=[best.x+best.ux*best.width/2,best.z+best.uz*best.width/2];h.segments.push({a,b:left},{a:right,b})}else h.segments.push({a,b})}
  }
+ let model;
  const isOpen=h=>!!doors[h.id];
  function setDoors(value){doors=value||{}}
  function insideHouse(x,z){return near(grid,x,z,0).find(h=>h.enterable&&pointInside(x,z,h.poly))||null}
@@ -57,11 +60,11 @@ export function createHousing(data){
    if(!h.enterable||vehicle){if(pointInside(x,z,h.poly)||h.poly.some((a,i)=>segmentDistance(x,z,a,h.poly[(i+1)%h.poly.length])<r))return true;continue}
    if(h.segments.some(s=>segmentDistance(x,z,s.a,s.b)<r+.12))return true;
    const door=h.door;if(!isOpen(h)&&segmentDistance(x,z,[door.x-door.ux*door.width/2,door.z-door.uz*door.width/2],[door.x+door.ux*door.width/2,door.z+door.uz*door.width/2])<r+.1)return true;
-   if(h.partitions.some(s=>segmentDistance(x,z,s.a,s.b)<r+.08))return true;
+   if((model?.partitionsFor?.(h,0)||h.partitions).some(s=>segmentDistance(x,z,s.a,s.b)<r+.08))return true;
    const [u,v]=h.local(x,z);if(h.furniture.some(f=>Math.abs(u-f.u)<f.w/2+r&&Math.abs(v-f.v)<f.d/2+r))return true;
   }return false;
  }
  function toggleDoor(h,actors=[]){if(!h?.enterable)return false;if(isOpen(h)&&actors.some(a=>segmentDistance(a.x,a.z,[h.door.x-h.door.ux,h.door.z-h.door.uz],[h.door.x+h.door.ux,h.door.z+h.door.uz])<.85))return false;doors[h.id]=!isOpen(h);return true}
  function lootPoints(){return houses.filter(h=>h.enterable&&Math.hypot(h.x,h.z)<2000).sort((a,b)=>a.id-b.id).filter((_,i)=>i%3===0).slice(0,180).map((h,i)=>{const p=h.point(0,3);return{x:p[0],z:p[1],type:['food','ammo','part','fuel'][i%4],house:h.id}}).filter(l=>!blocked(l.x,l.z,.55))}
- return addLevels({houses,byId,near:(x,z,r=30)=>near(grid,x,z,r),blocked,insideHouse,nearestDoor,toggleDoor,isOpen,setDoors,getDoors:()=>doors,lootPoints,count:houses.filter(h=>h.enterable).length},pointInside,segmentDistance);
+ model=addLevels({houses,byId,near:(x,z,r=30)=>near(grid,x,z,r),blocked,insideHouse,nearestDoor,toggleDoor,isOpen,setDoors,getDoors:()=>doors,lootPoints,count:houses.filter(h=>h.enterable).length},pointInside,segmentDistance);return attachConstruction(model);
 }

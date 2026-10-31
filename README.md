@@ -12,6 +12,12 @@ Téléchargez `DeadHorizon.exe`, ouvrez le lanceur, connectez-vous à votre comp
 
 Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le composant Microsoft WebView2 Evergreen, déjà installé sur la plupart des PC Windows récents. Le lien officiel pour l’installer si nécessaire : https://developer.microsoft.com/microsoft-edge/webview2/.
 
+## Carte et travaux 5.4
+
+Les bâtiments utilisent les empreintes OpenStreetMap, complétées par les hauteurs et niveaux IGN BD TOPO et un contrôle cadastral. 68 petites annexes confirmées ont été ajoutées. Les façades, toitures non mesurées et intérieurs sont des approximations ; il ne s’agit pas d’un relevé architectural intégral.
+
+Dans une maison, ouvrir **I → Construction & aménagement** pour placer une cloison, une porte ou une fenêtre. Caisse à outils et matériaux de construction récupérés nécessaires. Les matériaux se trouvent dans les ateliers ou en démontant des cloisons intérieures. Les modifications sont persistantes et partagées. Les murs extérieurs et les escaliers ne sont pas démontables dans cette version.
+
 ## Cette version alpha
 
 - Serveur commun jusqu’à **16 joueurs simultanés**.

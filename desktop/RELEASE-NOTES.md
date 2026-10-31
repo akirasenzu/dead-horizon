@@ -1,3 +1,11 @@
+# Dead Horizon PC — Carte et travaux 5.4
+
+- Bâtiments recoupés avec IGN BD TOPO et le cadastre : 10 864 hauteurs exploitables, 7 716 indications de niveaux et 68 petites annexes ajoutées. Les données non vérifiées restent estimées.
+- Niveaux de 3 m, toitures découpées selon les empreintes réelles, ouvertures et escaliers adaptés.
+- Inventaire → Construction & aménagement : plan de placement sur grille de 50 cm, cloisons de 2 m, portes ouvrantes et fenêtres. Caisse à outils et matériaux récupérés nécessaires.
+- Démontage des cloisons intérieures et récupération des matériaux ; les murs extérieurs et les escaliers restent protégés. Les changements sont sauvegardés et partagés en ligne.
+- Mise à jour du protocole réseau : relancer le client pour utiliser la nouvelle carte. Sauvegardes, personnages et objets conservés.
+
 # Dead Horizon PC — Mécanique des véhicules 5.3
 
 - Démonte et remonte le moteur, le radiateur, la batterie, les portes et chaque roue. Les pièces récupérées conservent leur état, leur compatibilité et la charge de batterie.

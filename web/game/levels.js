@@ -1,5 +1,6 @@
+import {STOREY_HEIGHT} from './building-metrics.js';
 // Floor identity is authoritative; clients never submit an elevation.
-export const LEVEL_HEIGHT=3.4;
+export const LEVEL_HEIGHT=STOREY_HEIGHT;
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 export const floorOf=actor=>Math.max(0,Math.floor(Number(actor?.floor)||0));
 export const sameLevel=(a,b)=>floorOf(a)===floorOf(b)&&(floorOf(a)===0||a.houseId===b.houseId);
@@ -7,13 +8,13 @@ export function addLevels(housing,pointInside,segmentDistance){
  const originalBlocked=housing.blocked;
  for(const h of housing.houses){
   h.floorCount=1;h.stairs=null;
-  if(!h.enterable||h.source.h<6.7)continue;
+  if(!h.enterable||h.source.h<STOREY_HEIGHT*2-.1)continue;
   const fits=(u,v,w,d)=>[[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]].every(([x,z])=>{const p=h.point(u+x,v+z);return pointInside(...p,h.poly)&&h.poly.every((a,i)=>segmentDistance(...p,a,h.poly[(i+1)%h.poly.length])>.2)});
   outer:for(const length of[4,3.4,2.8])for(const u of[-1.8,1.8,-1.45,1.45,-2.7,2.7]){
    const start=1.25,end=start+length;
    if(!fits(u,(start+end+.4)/2,1.5,length+2.2))continue;
    h.stairs={u,start,end,width:1.35,bottom:h.point(u,start-.45),top:h.point(u,end+.7)};
-   h.floorCount=Math.min(4,Math.max(2,Math.floor((h.source.h+.1)/LEVEL_HEIGHT)));
+   h.floorCount=Math.min(4,Math.max(2,h.source.survey?.levels||Math.floor((h.source.h+.1)/LEVEL_HEIGHT)));
    // Reserve the staircase and its two landings rather than overlapping furniture.
    const previousFurniture=h.furniture,previousPartitions=h.partitions;
    const rect={left:u-1.15,right:u+1.15,front:start-1.3,back:end+1.5};
@@ -39,7 +40,7 @@ export function addLevels(housing,pointInside,segmentDistance){
   const level=floorOf(options),h=level?housing.byId.get(options.houseId):housing.insideHouse(x,z);
   if(level){
    if(!h?.enterable||level>=h.floorCount||!pointInside(x,z,h.poly)||h.poly.some((a,i)=>segmentDistance(x,z,a,h.poly[(i+1)%h.poly.length])<r+.12))return true;
-   if(h.partitions.some(s=>segmentDistance(x,z,s.a,s.b)<r+.08))return true;
+   if((housing.partitionsFor?.(h,level)||h.partitions).some(s=>segmentDistance(x,z,s.a,s.b)<r+.08))return true;
    const[u,v]=h.local(x,z);if(furniture(h,level).some(f=>Math.abs(u-f.u)<f.w/2+r&&Math.abs(v-f.v)<f.d/2+r))return true;
   }else if(originalBlocked(x,z,r,options))return true;
   // The stair run is solid. Use the appropriate landing to change floor.

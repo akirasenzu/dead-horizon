@@ -3,3 +3,13 @@ Database: Open Database License (ODbL) 1.0 https://opendatacommons.org/licenses/
 https://www.openstreetmap.org/copyright
 Source: Overpass API, bounding box 50.708,2.510,50.743,2.567. Retrieved 2026-10-29T18:38:02Z
 Building heights without height tags, architectural details and game props are fictional approximations.
+
+2026-10-31 survey update: IGN BD TOPO building heights, levels and physical materials,
+cross-checked against Cadastre Etalab building footprints. No occupants or ownership data.
+IGN BD TOPO: https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetCapabilities
+Cadastre Etalab: https://cadastre.data.gouv.fr/datasets/cadastre-etalab
+IGN and Cadastre data: Licence Ouverte / Open Licence 2.0
+https://www.etalab.gouv.fr/licence-ouverte-open-licence/
+IGN orthophotography used for visual reference only; not bundled as game textures.
+Source heights are adjusted when needed to accommodate the game's 3 m floor spacing.
+Room layouts, facade openings and unmeasured roofs remain approximations.
