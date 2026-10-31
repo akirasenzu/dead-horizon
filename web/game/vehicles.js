@@ -1,3 +1,4 @@
+import {supportsDetailedVehicle,buildDetailedVehicle,enhanceLegacyVehicle} from './vehicle-model.js';
 import * as T from './vendor/three.module.js';
 import {ROAD_VEHICLES,buildRoadVehicle} from './road-vehicles.js';
 import {KI5_VEHICLES,buildKI5Vehicle} from './ki5-vehicles.js';
@@ -9,7 +10,7 @@ const SURVIVAL_VEHICLES=[
 ];
 export const VEHICLES=[...SURVIVAL_VEHICLES,...ROAD_VEHICLES,...KI5_VEHICLES];
 const paintCache=new Map();function material(c,metal=.05){const key=c+':'+metal;if(!paintCache.has(key))paintCache.set(key,new T.MeshStandardMaterial({color:c,roughness:.72,metalness:metal}));return paintCache.get(key)}
-export function buildVehicle(spec){if(spec.source==='ki5')return buildKI5Vehicle(spec);if(spec.source==='dbh')return buildRoadVehicle(spec);const root=new T.Group(),wheels=[];const paint=spec.color,steel=0x343c38,chrome=0x92988d,glass=0x42616a,cream=0xc1b797,rubber=0x1b221f;
+function buildLegacyVehicle(spec){if(spec.source==='ki5')return buildKI5Vehicle(spec);if(spec.source==='dbh')return buildRoadVehicle(spec);const root=new T.Group(),wheels=[];const paint=spec.color,steel=0x343c38,chrome=0x92988d,glass=0x42616a,cream=0xc1b797,rubber=0x1b221f;
  function box(w,h,d,c,x,y,z){const m=new T.Mesh(new T.BoxGeometry(w,h,d),material(c));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;root.add(m);return m}
  function cyl(r,h,c,x,y,z,rot=0){const m=new T.Mesh(new T.CylinderGeometry(r,r,h,16),material(c,.15));m.position.set(x,y,z);m.rotation.z=rot;m.castShadow=true;root.add(m);return m}
  function bar(a,b,r=.05,c=steel){const p=new T.Vector3(...a),q=new T.Vector3(...b),v=q.clone().sub(p);const m=new T.Mesh(new T.CylinderGeometry(r,r,v.length(),8),material(c,.35));m.position.copy(p).add(q).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),v.normalize());m.castShadow=true;root.add(m)}
@@ -29,3 +30,5 @@ export function buildVehicle(spec){if(spec.source==='ki5')return buildKI5Vehicle
  for(let i=0;i<14;i++){const side=i%2?-1:1;box(.025,.03+.025*(i%3),.18+.15*(i%4),i%3?0x817458:0x523f2f,side*(width/2+.012),base-.15+(i%4)*.09,-length/2+.3+(i*.43)%(length-.6))}
  root.userData.wheels=wheels;root.userData.spec=spec;return root;
 }
+
+export function buildVehicle(spec){return supportsDetailedVehicle(spec)?buildDetailedVehicle(spec):enhanceLegacyVehicle(buildLegacyVehicle(spec),spec)}

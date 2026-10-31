@@ -1,53 +1,48 @@
 import * as T from './vendor/three.module.js';
-const brickColors=[0x985c43,0xad6f50,0x87503d,0xb48061,0xb4a08a,0x795245];
-function texture(kind){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');let seed=73;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
- x.fillStyle=kind==='brick'?'#827b6e':kind==='roof'?'#30393c':'#83705a';x.fillRect(0,0,256,256);
- if(kind==='brick')for(let row=0;row<16;row++)for(let col=-1;col<9;col++){const v=160+random()*70;x.fillStyle=`rgb(${v},${v*.84},${v*.72})`;x.fillRect(col*32+(row%2)*16+1,row*16+1,30,14);x.fillStyle='#ffffff12';x.fillRect(col*32+(row%2)*16+1,row*16+1,30,2)}
- else if(kind==='roof')for(let r=0;r<16;r++)for(let j=-1;j<9;j++){const v=65+random()*35;x.fillStyle=`rgb(${v*.85},${v*.96},${v})`;x.fillRect(j*32+(r%2)*16+1,r*16+1,30,14)}
- else for(let r=0;r<16;r++){x.fillStyle=`hsl(32 24% ${39+random()*14}%)`;x.fillRect(0,r*16+1,256,14);for(let j=0;j<24;j++){x.strokeStyle='#35261820';x.beginPath();const yy=r*16+random()*14;x.moveTo(0,yy);x.lineTo(256,yy+random()*2);x.stroke()}}
+import {buildingStyle,facadeEdges,facadeOpenings,facadePanels,roofFrame} from './building-style.js';
+import {ModelBatch} from './model-kit.js';
+import {buildNearFacade} from './facade-model.js';
+
+function texture(kind){const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');let seed=73;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+ x.fillStyle=kind==='brick'?'#807e72':kind==='roof'?'#373f40':kind==='plaster'?'#ded8c9':'#83705a';x.fillRect(0,0,512,512);
+ if(kind==='brick')for(let row=0;row<32;row++)for(let col=-1;col<17;col++){const v=177+random()*62,px=col*32+(row%2)*16;x.fillStyle=`rgb(${v},${v*.92},${v*.84})`;x.fillRect(px+1,row*16+1,30,14);x.fillStyle='#ffffff18';x.fillRect(px+1,row*16+1,30,1);x.fillStyle='#514c442c';x.fillRect(px+1,row*16+14,30,1)}
+ else if(kind==='roof')for(let r=0;r<32;r++)for(let j=-1;j<17;j++){const v=84+random()*49;x.fillStyle=`rgb(${v*.92},${v},${v*1.03})`;x.fillRect(j*32+(r%2)*16+1,r*16+1,30,14);x.fillStyle='#ffffff18';x.fillRect(j*32+(r%2)*16+1,r*16+1,30,1)}
+ else if(kind==='floor')for(let r=0;r<24;r++){x.fillStyle=`hsl(32 24% ${39+random()*14}%)`;x.fillRect(0,r*22+1,512,20);for(let j=0;j<12;j++){x.strokeStyle='#35261820';x.beginPath();const yy=r*22+random()*20;x.moveTo(0,yy);x.lineTo(512,yy+random()*2);x.stroke()}}
+ for(let i=0;i<22000;i++){const px=random()*512,py=random()*512;x.fillStyle=random()>.5?'#fff2':'#171d1819';x.fillRect(px,py,1+random()*2,1)}
+ if(kind==='plaster')for(let i=0;i<24;i++){const px=random()*512,py=random()*512;x.strokeStyle='#555f4d15';x.beginPath();x.moveTo(px,py);for(let j=0;j<5;j++)x.lineTo(px+(random()-.5)*18,py+j*8);x.stroke()}
  const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t;
 }
+
 const buffer=()=>({p:[],c:[],uv:[],id:[]});
 function tri(out,a,b,c,color,id=0,uv=[[0,0],[1,0],[1,1]]){const col=new T.Color(color);for(const [i,p]of[a,b,c].entries()){out.p.push(...p);out.c.push(col.r,col.g,col.b);out.uv.push(...uv[i]);out.id.push(id)}}
 function quad(out,a,b,c,d,color,id=0,scale=1){const w=Math.hypot(b[0]-a[0],b[2]-a[2])/scale,h=Math.hypot(c[0]-b[0],c[1]-b[1],c[2]-b[2])/scale;tri(out,a,b,c,color,id,[[0,0],[w,0],[w,h]]);tri(out,a,c,d,color,id,[[0,0],[w,h],[0,h]])}
 function polygon(out,p,y,color,id=0){for(const indices of T.ShapeUtils.triangulateShape(p.map(v=>new T.Vector2(...v)),[])){const q=indices.map(i=>[p[i][0],y,p[i][1]]);tri(out,...q,color,id,q.map(p=>[p[0]/3,p[2]/3]))}}
 function makeMesh(out,material){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(out.p,3));g.setAttribute('color',new T.Float32BufferAttribute(out.c,3));g.setAttribute('uv',new T.Float32BufferAttribute(out.uv,2));g.setAttribute('houseId',new T.Float32BufferAttribute(out.id,1));g.computeVertexNormals();g.computeBoundingSphere();const m=new T.Mesh(g,material);m.receiveShadow=true;return m}
 export function createHousingView(scene,housing){
- const root=new T.Group();scene.add(root);const activeId={value:-1},cutHeight={value:1000},brickTexture=texture('brick'),roofTexture=texture('roof'),floorTexture=texture('floor');
+ const root=new T.Group();scene.add(root);const activeId={value:-1},cutHeight={value:1000},brickTexture=texture('brick'),roofTexture=texture('roof'),floorTexture=texture('floor'),plasterTexture=texture('plaster');
  function material(map=null){const m=new T.MeshStandardMaterial({map,vertexColors:true,roughness:.91,side:T.DoubleSide});m.onBeforeCompile=s=>{s.uniforms.activeHouse=activeId;s.uniforms.cutHeight=cutHeight;s.vertexShader='attribute float houseId; varying float vHouse; varying float vHouseY;\n'+s.vertexShader;s.vertexShader=s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvHouse=houseId;vHouseY=position.y;');s.fragmentShader='uniform float activeHouse;uniform float cutHeight;varying float vHouse;varying float vHouseY;\n'+s.fragmentShader;s.fragmentShader=s.fragmentShader.replace('#include <clipping_planes_fragment>','#include <clipping_planes_fragment>\nif(abs(vHouse-activeHouse)<0.1 && vHouseY>cutHeight)discard;')};return m}
- const wallMat=material(brickTexture),roofMat=material(roofTexture),plainMat=material(),floorMat=material(floorTexture),glassMat=material();const sectors=new Map(),sectorMeshes=[];
+ const wallMat=material(brickTexture),plasterMat=material(plasterTexture),roofMat=material(roofTexture),plainMat=material(),floorMat=material(floorTexture),glassMat=material();wallMat.bumpMap=brickTexture;wallMat.bumpScale=.025;roofMat.bumpMap=roofTexture;roofMat.bumpScale=.018;glassMat.transparent=true;glassMat.opacity=.43;glassMat.roughness=.22;glassMat.metalness=.12;glassMat.depthWrite=false;glassMat.forceSinglePass=true;const sectors=new Map(),sectorMeshes=[];
  function outFor(h,kind){const key=Math.floor(h.x/160)+':'+Math.floor(h.z/160)+':'+kind;if(!sectors.has(key))sectors.set(key,{out:buffer(),kind});return sectors.get(key).out}
  let renderId=0;
- for(const h of housing.houses){if(!h.enterable)continue;h.renderId=++renderId;const id=h.renderId,height=h.source.h,color=brickColors[h.id%brickColors.length],walls=outFor(h,'wall'),roof=outFor(h,'roof'),detail=outFor(h,'detail');
-  const wall=(a,b,y0,y1,col=color)=>quad(walls,[a[0],y0,a[1]],[b[0],y0,b[1]],[b[0],y1,b[1]],[a[0],y1,a[1]],col,id,4);
-  for(const s of h.segments)wall(s.a,s.b,0,height);
-  for(const seg of h.segments)wall(seg.a,seg.b,0,.38,0x67675d);
-  const d=h.door,l=[d.x-d.ux*d.width/2,d.z-d.uz*d.width/2],r=[d.x+d.ux*d.width/2,d.z+d.uz*d.width/2];wall(l,r,2.65,height);
-  const face=(u,y,v)=>{const p=h.point(u,v);return[p[0],y,p[1]]};
-  // Stone lintel, jambs, threshold and a glazed transom identify the entrance.
-  quad(detail,face(-1.08,2.65,-.13),face(1.08,2.65,-.13),face(1.08,2.9,-.13),face(-1.08,2.9,-.13),0xc7bba0,id);
-  for(const u of[-1.03,1.03])quad(detail,face(u-.08,0,-.12),face(u+.08,0,-.12),face(u+.08,2.65,-.12),face(u-.08,2.65,-.12),0xc7bba0,id);
-  for(let i=0;i<h.poly.length;i++){const a=h.poly[i],b=h.poly[(i+1)%h.poly.length],len=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/len,uz=(b[1]-a[1])/len;const sign=pointSign(h.poly),nx=uz*sign,nz=-ux*sign;
-   const p=(t,y,off=.06)=>[a[0]+ux*t+nx*off,y,a[1]+uz*t+nz*off];
-   for(let t=1.7;t<len-1.2;t+=3.1)for(let y=1.8;y<height-1;y+=3.4){if(i===d.edge&&y<3&&Math.abs(t-d.t)<1.8)continue;const w=Math.min(.65,len/5),hh=.8;
-    quad(detail,p(t-w-.1,y-hh-.1),p(t+w+.1,y-hh-.1),p(t+w+.1,y+hh+.1),p(t-w-.1,y+hh+.1),0xc9bea9,id);
-    quad(detail,p(t-w,y-hh,.075),p(t+w,y-hh,.075),p(t+w,y+hh,.075),p(t-w,y+hh,.075),0x304449,id);
-    quad(detail,p(t-.035,y-hh,.09),p(t+.035,y-hh,.09),p(t+.035,y+hh,.09),p(t-.035,y+hh,.09),0xd2c7af,id);
-    quad(detail,p(t-w-.15,y-hh-.12,.12),p(t+w+.15,y-hh-.12,.12),p(t+w+.15,y-hh,.12),p(t-w-.15,y-hh,.12),0xb7b0a1,id);
-   }
-   wall(a,b,height-.22,height,0x9d9584);
+ for(const h of housing.houses){if(!h.enterable)continue;h.renderId=++renderId;const id=h.renderId,height=h.source.h,style=buildingStyle(h),color=style.color,walls=outFor(h,style.plaster?'plaster':'wall'),roof=outFor(h,'roof'),detail=outFor(h,'detail'),glass=outFor(h,'glass');
+  const edges=facadeEdges(h),wall=(a,b,y0,y1,col=color)=>quad(walls,[a[0],y0,a[1]],[b[0],y0,b[1]],[b[0],y1,b[1]],[a[0],y1,a[1]],col,id,3);
+  for(const p of facadePanels(h)){const a=p.edge.point(p.left,0),b=p.edge.point(p.right,0);wall([a[0],a[2]],[b[0],b[2]],p.bottom,p.top)}
+  for(const e of edges){const point=(t,y,off=.035)=>e.point(t,y,off);quad(detail,point(0,0),point(e.length,0),point(e.length,.32),point(0,.32),0x777a70,id);quad(detail,point(0,height-.22),point(e.length,height-.22),point(e.length,height),point(0,height),0xb5af9f,id);if(!style.plaster)for(let y=3.4;y<height-.8;y+=3.4)quad(detail,point(0,y-.045),point(e.length,y-.045),point(e.length,y+.045),point(0,y+.045),0xa89f8e,id)}
+  for(const w of facadeOpenings(h)){const e=edges[w.edge],p=(t,y,off=.038)=>e.point(t,y,off),c=style.frame;
+   for(const side of[-1,1]){const t=w.t+side*(w.w/2+.055);quad(detail,p(t-.055,w.bottom-.1),p(t+.055,w.bottom-.1),p(t+.055,w.top+.1),p(t-.055,w.top+.1),c,id)}
+   for(const y of[w.bottom-.055,w.top+.055])quad(detail,p(w.left-.1,y-.055),p(w.right+.1,y-.055),p(w.right+.1,y+.055),p(w.left-.1,y+.055),c,id);
+   quad(glass,p(w.left,w.bottom,-.012),p(w.right,w.bottom,-.012),p(w.right,w.top,-.012),p(w.left,w.top,-.012),0x789293,id);
+   quad(detail,p(w.t-.026,w.bottom,.02),p(w.t+.026,w.bottom,.02),p(w.t+.026,w.top,.02),p(w.t-.026,w.top,.02),c,id);
   }
-  // Retain the footprint. Rectangular town houses receive pitched slate roofs.
-  let edge=0;for(let i=1;i<h.poly.length;i++)if(hyp(h.poly[i],h.poly[(i+1)%h.poly.length])>hyp(h.poly[edge],h.poly[(edge+1)%h.poly.length]))edge=i;
-  const a=h.poly[edge],b=h.poly[(edge+1)%h.poly.length],len=hyp(a,b),ux=(b[0]-a[0])/len,uz=(b[1]-a[1])/len,vx=-uz,vz=ux,ps=h.poly.map(p=>[(p[0]-h.x)*vx+(p[1]-h.z)*vz,(p[0]-h.x)*ux+(p[1]-h.z)*uz]),x0=Math.min(...ps.map(p=>p[0])),x1=Math.max(...ps.map(p=>p[0])),z0=Math.min(...ps.map(p=>p[1])),z1=Math.max(...ps.map(p=>p[1]));
-  const rectArea=(x1-x0)*(z1-z0),area=Math.abs(h.poly.reduce((v,p,i)=>v+p[0]*h.poly[(i+1)%h.poly.length][1]-h.poly[(i+1)%h.poly.length][0]*p[1],0)/2);
-  if(area/rectArea>.9&&x1-x0<26){const p=(x,y,z)=>[h.x+vx*x+ux*z,y,h.z+vz*x+uz*z],xm=(x0+x1)/2,rise=Math.min(4.3,(x1-x0)*.45);quad(roof,p(x0-.2,height,z0-.2),p(x0-.2,height,z1+.2),p(xm,height+rise,z1+.2),p(xm,height+rise,z0-.2),0xb4bbc0,id,3);quad(roof,p(x1+.2,height,z1+.2),p(x1+.2,height,z0-.2),p(xm,height+rise,z0-.2),p(xm,height+rise,z1+.2),0x8c959c,id,3);for(const z of[z0,z1])tri(walls,p(x0,height,z),p(x1,height,z),p(xm,height+rise,z),color,id)}else polygon(roof,h.poly,height,0x8b9497,id);
+  const d=h.door,face=(u,y,v)=>{const p=h.point(u,v);return[p[0],y,p[1]]};for(const u of[-d.width/2-.1,d.width/2+.1])quad(detail,face(u-.08,0,-.03),face(u+.08,0,-.03),face(u+.08,2.7,-.03),face(u-.08,2.7,-.03),0xc7bba0,id);
+  const f=roofFrame(h),p=f.point;if(f.pitched){quad(roof,p(f.x0-.2,height,f.z0-.2),p(f.x0-.2,height,f.z1+.2),p(f.xm,height+f.rise,f.z1+.2),p(f.xm,height+f.rise,f.z0-.2),style.roof,id,2.6);quad(roof,p(f.x1+.2,height,f.z1+.2),p(f.x1+.2,height,f.z0-.2),p(f.xm,height+f.rise,f.z0-.2),p(f.xm,height+f.rise,f.z1+.2),shadeRoof(style.roof),id,2.6);for(const z of[f.z0,f.z1])tri(walls,p(f.x0,height,z),p(f.x1,height,z),p(f.xm,height+f.rise,z),color,id)}else polygon(roof,h.poly,height,0x8b9497,id);
  }
- for(const {out,kind}of sectors.values()){const m=makeMesh(out,kind==='wall'?wallMat:kind==='roof'?roofMat:plainMat);root.add(m);sectorMeshes.push(m)}sectors.clear();
+
+ for(const {out,kind}of sectors.values()){const m=makeMesh(out,kind==='wall'?wallMat:kind==='plaster'?plasterMat:kind==='roof'?roofMat:kind==='glass'?glassMat:plainMat);root.add(m);sectorMeshes.push(m)}sectors.clear();
  const loaded=new Map(),doorMaterial=new T.MeshStandardMaterial({color:0x345048,roughness:.75}),handleMaterial=new T.MeshStandardMaterial({color:0xc8b07a,metalness:.5,roughness:.4});
  const boxGeometry=new T.BoxGeometry(1,1,1);
  function interior(h){
-  const g=new T.Group(),out=buffer(),floors=buffer(),ceilings=[],groups=[],id=h.renderId;root.add(g);
+  const g=new T.Group(),out=buffer(),floors=buffer(),ceilings=[],groups=[],id=h.renderId;root.add(g);g.add(buildNearFacade(h,plainMat));
   const floorPolygon=(out,y,color,hole=false)=>{
    if(!hole||!h.stairs){polygon(out,h.poly,y,color,id);return}
    const st=h.stairs,opening=[h.point(st.u-.73,st.start-.05),h.point(st.u+.73,st.start-.05),h.point(st.u+.73,st.end+.1),h.point(st.u-.73,st.end+.1)],points=[...h.poly,...opening];
@@ -59,8 +54,8 @@ export function createHousingView(scene,housing){
     y+=base;const a=h.point(u-w/2,v-d/2),b=h.point(u+w/2,v-d/2),c=h.point(u+w/2,v+d/2),e=h.point(u-w/2,v+d/2);
     quad(out,[a[0],y,a[1]],[b[0],y,b[1]],[b[0],y+ht,b[1]],[a[0],y+ht,a[1]],color,id);quad(out,[b[0],y,b[1]],[c[0],y,c[1]],[c[0],y+ht,c[1]],[b[0],y+ht,b[1]],color,id);quad(out,[c[0],y,c[1]],[e[0],y,e[1]],[e[0],y+ht,e[1]],[c[0],y+ht,c[1]],color,id);quad(out,[e[0],y,e[1]],[a[0],y,a[1]],[a[0],y+ht,a[1]],[e[0],y+ht,e[1]],color,id);quad(out,[a[0],y+ht,a[1]],[b[0],y+ht,b[1]],[c[0],y+ht,c[1]],[e[0],y+ht,e[1]],color,id);
    };
-   const segments=level?h.poly.map((a,i)=>({a,b:h.poly[(i+1)%h.poly.length]})):h.segments;
-   for(const seg of segments){const dx=seg.b[0]-seg.a[0],dz=seg.b[1]-seg.a[1],len=Math.hypot(dx,dz),sg=pointSign(h.poly),nx=-dz/len*.035*sg,nz=dx/len*.035*sg;quad(out,[seg.a[0]+nx,base+.12,seg.a[1]+nz],[seg.b[0]+nx,base+.12,seg.b[1]+nz],[seg.b[0]+nx,base+3.35,seg.b[1]+nz],[seg.a[0]+nx,base+3.35,seg.a[1]+nz],level?0xb8c1b1:0xd0c3ab,id)}
+   for(const panel of facadePanels(h)){const y0=Math.max(base+.12,panel.bottom),y1=Math.min(base+3.35,panel.top);if(y1<=y0)continue;const a=panel.edge.point(panel.left,y0,-.045),b=panel.edge.point(panel.right,y0,-.045),c=panel.edge.point(panel.right,y1,-.045),d=panel.edge.point(panel.left,y1,-.045);quad(out,a,b,c,d,level?0xb8c1b1:0xd0c3ab,id)}
+
    for(const seg of h.partitions)quad(out,[seg.a[0],base,seg.a[1]],[seg.b[0],base,seg.b[1]],[seg.b[0],base+3.35,seg.b[1]],[seg.a[0],base+3.35,seg.a[1]],level?0xb4bfc0:0xb7b5a4,id);
    for(const f of housing.floorFurniture(h,level)){
     if(f.kind==='bed'){put(f.u,.12,f.v,f.w,.35,f.d,0x66533d);put(f.u,.47,f.v,f.w,.2,f.d,0xd6cebb);put(f.u,.68,f.v+.3,f.w,.05,f.d*.65,0x6a8278);put(f.u,.69,f.v-f.d*.32,f.w*.7,.15,.45,0xe0d7c3)}
@@ -75,7 +70,7 @@ export function createHousingView(scene,housing){
    }
   }
   g.add(makeMesh(floors,floorMat),makeMesh(out,plainMat));
-  const d=h.door,pivot=new T.Group();pivot.position.set(d.x-d.ux*d.width/2,0,d.z-d.uz*d.width/2);pivot.rotation.y=Math.atan2(-d.uz,d.ux);g.add(pivot);const leaf=new T.Mesh(boxGeometry,doorMaterial);leaf.scale.set(d.width,2.58,.1);leaf.position.set(d.width/2,1.29,0);pivot.add(leaf);const handle=new T.Mesh(boxGeometry,handleMaterial);handle.scale.set(.15,.06,.18);handle.position.set(d.width-.18,1.1,0);pivot.add(handle);g.updateMatrixWorld(true);return{h,g,pivot,ceilings,baseAngle:pivot.rotation.y,stamp:0};
+  const d=h.door,pivot=new T.Group();pivot.position.set(d.x-d.ux*d.width/2,0,d.z-d.uz*d.width/2);pivot.rotation.y=Math.atan2(-d.uz,d.ux);g.add(pivot);const leafBatch=new ModelBatch(),handleBatch=new ModelBatch();leafBatch.box(d.width,2.58,.1,0xffffff,d.width/2,1.29,0);for(const y of[.58,1.58])leafBatch.box(d.width*.7,.7,.04,0xffffff,d.width/2,y,-.07);handleBatch.box(.32,.065,.03,0xffffff,d.width/2,1.13,-.08);handleBatch.box(.15,.06,.18,0xffffff,d.width-.18,1.1,0);pivot.add(leafBatch.mesh(doorMaterial),handleBatch.mesh(handleMaterial));g.updateMatrixWorld(true);return{h,g,pivot,ceilings,baseAngle:pivot.rotation.y,stamp:0};
  }
  let last=-Infinity,current=null,doorHealth={};
  function update(position,third,now,actor={}){
@@ -92,3 +87,7 @@ export function createHousingView(scene,housing){
 }
 function pointSign(p){return p.reduce((s,a,i)=>{const b=p[(i+1)%p.length];return s+a[0]*b[1]-b[0]*a[1]},0)>0?1:-1}
 function hyp(a,b){return Math.hypot(b[0]-a[0],b[1]-a[1])}
+
+function shadeRoof(color){return new T.Color(color).multiplyScalar(.85).getHex()}
+
+export const createSurfaceTexture=texture;

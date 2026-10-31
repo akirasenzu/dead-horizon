@@ -1,6 +1,6 @@
 import * as T from './vendor/three.module.js';
 import {prepareCityMap,createHousing} from './housing.js?v=2.1';
-import {createHousingView} from './housing-view.js?v=2.1';
+import {createHousingView,createSurfaceTexture} from './housing-view.js?v=2.1';
 const CELL=60;
 export async function createCity(scene){const response=await fetch('./world-map.json');if(!response.ok)throw Error('Carte indisponible');const raw=await response.json(),layoutResponse=await fetch('./housing-layout.json?v=2.1');if(!layoutResponse.ok)throw Error('Intérieurs indisponibles');raw.housingLayouts=await layoutResponse.json();const data=prepareCityMap(raw),housing=createHousing(data),obstacles=[],grid=new Map(),roadGrid=new Map(),segments=[],roadPoints=[],root=new T.Group();scene.add(root);
 const cellKey=(x,z)=>Math.floor(x/CELL)+':'+Math.floor(z/CELL);function index(map,item,x0,z0,x1,z1){for(let x=Math.floor(x0/CELL);x<=Math.floor(x1/CELL);x++)for(let z=Math.floor(z0/CELL);z<=Math.floor(z1/CELL);z++){const key=x+':'+z;if(!map.has(key))map.set(key,[]);map.get(key).push(item)}}
@@ -16,13 +16,14 @@ function polygon(out,p,y,color){if(p.length<3)return;const points=p.map(a=>new T
 function ribbon(out,a,b,width,y,color){const dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz);if(l<.02)return;const nx=dz/l*width/2,nz=-dx/l*width/2;quad(out,[a[0]+nx,y,a[1]+nz],[b[0]+nx,y,b[1]+nz],[b[0]-nx,y,b[1]-nz],[a[0]-nx,y,a[1]-nz],color)}
 const renderSectors=[],sectorSize=200,geometrySectors=new Map();
 function trackSector(mesh){if(mesh.isInstancedMesh)mesh.computeBoundingSphere();else mesh.geometry.computeBoundingSphere();const sphere=mesh.isInstancedMesh?mesh.boundingSphere:mesh.geometry.boundingSphere;renderSectors.push({mesh,sphere});root.add(mesh)}
-function finish(out){
+function finish(out,kind='ground'){
  const sectors=geometrySectors;
- for(let i=0;i<out.positions.length;i+=9){const x=(out.positions[i]+out.positions[i+3]+out.positions[i+6])/3,z=(out.positions[i+2]+out.positions[i+5]+out.positions[i+8])/3,key=Math.floor(x/sectorSize)+':'+Math.floor(z/sectorSize);let sector=sectors.get(key);if(!sector){sector=buffer();sectors.set(key,sector)}for(let j=0;j<9;j++){sector.positions.push(out.positions[i+j]);sector.colors.push(out.colors[i+j])}}
+ for(let i=0;i<out.positions.length;i+=9){const x=(out.positions[i]+out.positions[i+3]+out.positions[i+6])/3,z=(out.positions[i+2]+out.positions[i+5]+out.positions[i+8])/3,key=Math.floor(x/sectorSize)+':'+Math.floor(z/sectorSize)+':'+kind;let sector=sectors.get(key);if(!sector){sector={...buffer(),kind};sectors.set(key,sector)}for(let j=0;j<9;j++){sector.positions.push(out.positions[i+j]);sector.colors.push(out.colors[i+j])}}
  out.positions.length=out.colors.length=0;
  }
-function buildSectors(){const material=new T.MeshStandardMaterial({vertexColors:true,roughness:.95,side:T.DoubleSide});for(const sector of geometrySectors.values()){const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(sector.positions,3));geo.setAttribute('color',new T.Float32BufferAttribute(sector.colors,3));geo.computeVertexNormals();const mesh=new T.Mesh(geo,material);mesh.receiveShadow=true;trackSector(mesh)}geometrySectors.clear();
+function buildSectors(){const stone=createSurfaceTexture('brick'),slate=createSurfaceTexture('roof'),materials={ground:new T.MeshStandardMaterial({vertexColors:true,roughness:.95,side:T.DoubleSide}),wall:new T.MeshStandardMaterial({map:stone,bumpMap:stone,bumpScale:.025,vertexColors:true,roughness:.94,side:T.DoubleSide}),roof:new T.MeshStandardMaterial({map:slate,bumpMap:slate,bumpScale:.018,vertexColors:true,roughness:.9,side:T.DoubleSide})};for(const sector of geometrySectors.values()){const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(sector.positions,3));geo.setAttribute('color',new T.Float32BufferAttribute(sector.colors,3));if(sector.kind!=='ground'){const uv=[];for(let i=0;i<sector.positions.length;i+=9){const p=sector.positions,alongX=Math.abs(p[i+3]-p[i])+Math.abs(p[i+6]-p[i])>Math.abs(p[i+5]-p[i+2])+Math.abs(p[i+8]-p[i+2]);for(let j=0;j<9;j+=3)uv.push((alongX?p[i+j]:p[i+j+2])/3,sector.kind==='wall'?p[i+j+1]/3:p[i+j+(alongX?2:0)]/3)}geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2))}geo.computeVertexNormals();const mesh=new T.Mesh(geo,materials[sector.kind]);mesh.receiveShadow=true;trackSector(mesh)}geometrySectors.clear();
 }
+
 const ground=new T.Mesh(new T.PlaneGeometry(30000,30000),new T.MeshStandardMaterial({color:0x707958,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.12;ground.receiveShadow=true;root.add(ground);
 const windowData=[],brick=[0x936d56,0xa17c62,0x876b55,0xa88870,0xb2a18a,0x8f7a64,0x987657,0xb49b7c],roofColors=[0x545e59,0x65685b,0x6c6152,0x57534d];
 function buildingFrame(b){const p=b.p;let best=0,angle=0;for(let i=0;i<p.length;i++){const a=p[i],c=p[(i+1)%p.length],len=Math.hypot(c[0]-a[0],c[1]-a[1]);if(len>best){best=len;angle=Math.atan2(c[0]-a[0],c[1]-a[1])}}const ux=Math.sin(angle),uz=Math.cos(angle),vx=uz,vz=-ux;const xs=p.map(a=>a[0]*vx+a[1]*vz),zs=p.map(a=>a[0]*ux+a[1]*uz),x0=Math.min(...xs),x1=Math.max(...xs),z0=Math.min(...zs),z1=Math.max(...zs);return {x:vx*(x0+x1)/2+ux*(z0+z1)/2,z:vz*(x0+x1)/2+uz*(z0+z1)/2,w:x1-x0,d:z1-z0,angle,point:(x,z)=>[vx*x+ux*z,vz*x+uz*z]}}
@@ -40,7 +41,7 @@ for(const line of data.rails)for(let i=1;i<line.length;i++){const a=line[i-1],b=
 const trees=[];let seed=1993;function random(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}
 for(const park of data.parks){polygon(green,park.p,.02,0x75875c);const xs=park.p.map(a=>a[0]),zs=park.p.map(a=>a[1]),x0=Math.min(...xs),x1=Math.max(...xs),z0=Math.min(...zs),z1=Math.max(...zs),count=Math.min(280,Math.round((x1-x0)*(z1-z0)/180));for(let i=0;i<count;i++){const x=x0+random()*(x1-x0),z=z0+random()*(z1-z0);if(inside(x,z,park.p)&&!blocked(x,z,2))trees.push([x,z,3+random()*4])}}
 for(let i=0;i<450;i++){const x=(random()-.5)*6500,z=(random()-.5)*6500;if(Math.hypot(x,z)>1600&&!blocked(x,z,2))trees.push([x,z,3+random()*4])}
-finish(walk);finish(street);finish(rail);finish(green);finish(walls);finish(roofs);
+finish(walk);finish(street);finish(rail);finish(green);finish(walls,'wall');finish(roofs,'roof');
 const dummy=new T.Object3D();
 function instanceSectors(items,position){const bins=new Map();for(const item of items){const [x,z]=position(item),key=Math.floor(x/sectorSize)+':'+Math.floor(z/sectorSize);if(!bins.has(key))bins.set(key,[]);bins.get(key).push(item)}return bins.values()}
 const windowFaces=buffer();for(const w of windowData){const vx=Math.cos(w.angle)*.5,vz=-Math.sin(w.angle)*.5;quad(windowFaces,[w.x-vx,w.y-.6,w.z-vz],[w.x+vx,w.y-.6,w.z+vz],[w.x+vx,w.y+.6,w.z+vz],[w.x-vx,w.y+.6,w.z-vz],0x405452)}finish(windowFaces);buildSectors();

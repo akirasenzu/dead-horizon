@@ -1,11 +1,12 @@
-# Dead Horizon PC — Personnages et armes 5.1
+# Dead Horizon PC — Ville et véhicules 5.2
 
-- Nouveaux humains articulés : proportions, visages, cheveux, barbes, vêtements, poches et chaussures détaillés. Le créateur de personnage utilise les mêmes modèles que la survie.
-- Zombies avec silhouettes, teints, coiffures et tenues déchirées variés ; démarche, bras et posture d’attaque distincts.
-- 76 armes remodelées par famille : pistolets, revolvers, fusils, mitraillettes, fusils de précision, mitrailleuses et mêlée. Chargeurs, crosses, canons, rails et organes de visée en volume.
-- Lunettes, silencieux, poignées, bipieds et autres accessoires visibles uniquement lorsqu’ils sont équipés. Mains et avant-bras en première personne ; prise en main articulée en troisième personne, recul et chargeur animé pendant le rechargement.
-- Géométrie regroupée par matériau et partagée entre zombies de même apparence pour limiter le coût du rendu.
+- Façades en briques ou enduit avec relief discret, encadrements, appuis et traverses. Les fenêtres sont de vraies ouvertures vitrées : les murs intérieurs correspondent aux ouvertures extérieures.
+- Détails chargés autour du joueur : gouttières, descentes d’eau, cheminées, rideaux, stores et certains volets. Portes à panneaux et boîtes aux lettres.
+- Toitures texturées, arêtiers et corniches ; matériaux détaillés aussi sur les bâtiments non accessibles.
+- Voitures remodelées par famille : berlines, coupés, sportives, compactes, classiques, fourgons, 4×4 et pick-up. Carrosseries galbées, passages de roue, jantes, pneus, phares, essuie-glaces, rétroviseurs, joints et usure.
+- Habitacles visibles avec sièges, tableau de bord, compteurs, volant et levier. La vue au volant utilise cet habitacle sur les véhicules remodelés.
+- Les 174 véhicules gardent leur identité et leurs réglages. Les véhicules spéciaux conservent leurs silhouettes avec roues détaillées et géométrie regroupée.
 
-Personnages, inventaires, objets fouillés et monde existant conservés. Aucun équipement gratuit ajouté au démarrage.
+Les portes, les étages, les rangements, les personnages et les véhicules sauvegardés sont conservés. Aucun équipement gratuit au départ.
 
-Ferme puis relance ton ancien DeadHorizon.exe pour recevoir cette mise à jour automatiquement.
+Ferme puis relance ton lanceur pour recevoir la mise à jour automatiquement.

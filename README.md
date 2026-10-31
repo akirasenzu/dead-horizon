@@ -23,6 +23,12 @@ Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le compo
 - Ressources persistantes et limitées, à fouiller puis à transporter. Les commandes sont synchronisées par requêtes HTTP périodiques avec interpolation côté client : ce prototype ne vise pas les latences d’un FPS compétitif.
 - Comptes avec identifiant et mot de passe, connexion mémorisée au choix pendant 30 jours. Un seul personnage vivant par compte ; nom, apparence, inventaire et progression conservés sur le serveur. Mort définitive : création d’un nouveau personnage. Pas de chat ni de serveur privé.
 
+## Ville et véhicules 5.2
+
+Façades texturées, fenêtres vitrées avec ouvertures réelles, encadrements, appuis, corniches et toits détaillés. Les rideaux, stores, gouttières, descentes d’eau et cheminées sont construits à proximité du joueur. Les fenêtres restent des limites de collision : l’entrée se fait toujours par les portes.
+
+Voitures remodelées par famille avec carrosseries galbées, pneus et jantes en volume, habitacle, sièges et tableau de bord visibles. La vue au volant utilise les nouveaux habitacles lorsqu’ils sont disponibles. Les 174 références conservent leurs réglages de conduite, clés, carburant et inventaire.
+
 ## Personnages et armes 5.1
 
 Humains et zombies articulés, visages et vêtements détaillés. Les 76 armes utilisent des modèles distincts par famille avec accessoires équipés visibles, bras en première personne, recul et rechargement animés. Les modèles sont construits et regroupés par matériau, avec géométrie partagée pour les infectés de même apparence.
