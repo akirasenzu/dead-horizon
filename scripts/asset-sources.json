@@ -11,8 +11,8 @@
   },
   {
     "path": "web/game/world-map.json",
-    "url": "https://dead-horizon-coop-291026.keentoad34.chatgpt.site/game/world-map.json",
-    "sha256": "8848c01e9f7508728ac3dfb830615b28def1ac68c4891feda79d49c419cc1c63"
+    "url": "https://raw.githubusercontent.com/akirasenzu/dead-horizon/9de67aef0a83da1b70c501c9f9e7fbe7e5ceeafa/web/game/world-map.json",
+    "sha256": "f70a0f002323b7930559e236c11c47bb7f5dcf6edb94cef3a30e2e20e707af43"
   },
   {
     "path": "web/assets/city.png",

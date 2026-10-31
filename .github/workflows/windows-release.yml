@@ -26,6 +26,8 @@ jobs:
       - name: Installer et vérifier le serveur
         shell: pwsh
         run: |
+          $ErrorActionPreference='Stop'
+          $PSNativeCommandUseErrorActionPreference=$true
           npm install --global pnpm@11.25.0
           pnpm install --frozen-lockfile
           pnpm test
