@@ -1,4 +1,4 @@
-import {roofSurfaces} from './building-style.js';
+import {roofSurfaces,exposedOpening} from './building-style.js';
 import {panelSolids} from './construction.js';
 import {STOREY_HEIGHT} from './building-metrics.js';
 import * as T from './vendor/three.module.js';
@@ -34,7 +34,7 @@ const frames=new Map();
 for(const b of data.buildings){const p=b.p,xs=p.map(a=>a[0]),zs=p.map(a=>a[1]),x0=Math.min(...xs),x1=Math.max(...xs),z0=Math.min(...zs),z1=Math.max(...zs),o={id:b.id,x:(x0+x1)/2,z:(z0+z1)/2,w:(x1-x0)/2,d:(z1-z0)/2,height:b.h+3,poly:p};obstacles.push(o);index(grid,o,x0,z0,x1,z1);const color=b.id===81478118?0xc6c1a9:b.k==='church'?0x987355:brick[Math.abs(b.id)%brick.length];
 const f=buildingFrame(b);frames.set(b.id,f);if(housing.byId.get(b.id)?.enterable)continue;
 for(let i=0;i<p.length;i++){const a=p[i],c=p[(i+1)%p.length];quad(walls,[a[0],0,a[1]],[c[0],0,c[1]],[c[0],b.h,c[1]],[a[0],b.h,a[1]],color)}const shape=roofSurfaces(housing.byId.get(b.id));if(!shape)polygon(roofs,p,b.h,roofColors[Math.abs(b.id)%4]);else{for(const poly of shape.polygons)for(const indices of T.ShapeUtils.triangulateShape(poly.map(p=>new T.Vector2(...p)),[]))tri(roofs,...indices.map(i=>[poly[i][0],shape.height(poly[i]),poly[i][1]]),roofColors[Math.abs(b.id)%4]);for(const e of shape.edges){const ya=shape.height(e.a),yb=shape.height(e.b);quad(walls,[e.a[0],b.h,e.a[1]],[e.b[0],b.h,e.b[1]],[e.b[0],yb,e.b[1]],[e.a[0],ya,e.a[1]],color)}}
-if(Math.hypot(o.x,o.z)<850&&p.length<35&&b.h>4){const signed=p.reduce((s,a,i)=>{const c=p[(i+1)%p.length];return s+a[0]*c[1]-c[0]*a[1]},0)>0?1:-1;for(let i=0;i<p.length;i++){const a=p[i],c=p[(i+1)%p.length],dx=c[0]-a[0],dz=c[1]-a[1],len=Math.hypot(dx,dz);if(len<4||len>80)continue;const nx=dz/len*signed,nz=-dx/len*signed;for(let t=2;t<len-1;t+=4)for(let y=2;y<b.h-.7;y+=3)windowData.push({x:a[0]+dx*t/len+nx*.045,z:a[1]+dz*t/len+nz*.045,y,angle:Math.atan2(nx,nz)})}}
+if(Math.hypot(o.x,o.z)<850&&p.length<35&&b.h>4){const signed=p.reduce((s,a,i)=>{const c=p[(i+1)%p.length];return s+a[0]*c[1]-c[0]*a[1]},0)>0?1:-1;for(let i=0;i<p.length;i++){const a=p[i],c=p[(i+1)%p.length],dx=c[0]-a[0],dz=c[1]-a[1],len=Math.hypot(dx,dz);if(len<4||len>80)continue;const nx=dz/len*signed,nz=-dx/len*signed;for(let t=2;t<len-1;t+=4)for(let y=2;y<b.h-.7;y+=3)if(exposedOpening(housing.byId.get(b.id),{point:(t,y,off)=>[a[0]+dx*t/len+nx*off,y,a[1]+dz*t/len+nz*off]},t,1.5,y-.8))windowData.push({x:a[0]+dx*t/len+nx*.045,z:a[1]+dz*t/len+nz*.045,y,angle:Math.atan2(nx,nz)})}}
 }
 const housingView=createHousingView(scene,housing);
 const widths={motorway:13,trunk:12,primary:10,secondary:8,tertiary:7,residential:6,unclassified:6,living_street:5,service:4,pedestrian:5,footway:2,path:1.7,track:3,steps:2,cycleway:2.3};

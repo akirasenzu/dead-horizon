@@ -1,3 +1,4 @@
+import {FACADE_PROFILES} from './facade-profiles.js';
 import {attachConstruction} from './construction.js';
 import {buildingMetrics,STOREY_HEIGHT} from './building-metrics.js';
 import {addLevels} from './levels.js';
@@ -8,7 +9,7 @@ export function prepareCityMap(raw){
  if(raw.gameScale===CITY_SCALE)return raw;
  const point=p=>p.map(v=>Math.round(v*CITY_SCALE*100)/100);
  return {...raw,gameScale:CITY_SCALE,spawn:point(raw.spawn),
-  buildings:raw.buildings.map(b=>({...b,p:b.p.map(point),h:buildingMetrics(b).height})),
+  buildings:raw.buildings.map(b=>({...b,facade:FACADE_PROFILES[b.id]||b.facade,p:b.p.map(point),h:buildingMetrics(b).height})),
   roads:raw.roads.map(r=>({...r,p:r.p.map(point)})),rails:raw.rails.map(l=>l.map(point)),
   parks:raw.parks.map(p=>({...p,p:p.p.map(point)})),landmarks:raw.landmarks.map(p=>({...p,p:point(p.p)}))};
 }
@@ -27,15 +28,15 @@ export function createHousing(data){
   const allowed=['yes','house','detached','residential','apartments','retail','commercial','hotel'].includes(h.source.k)&&area>=38&&area<=900&&h.w>2.4&&h.d>2.4;
   let best=baked?.get(h.id)?.door||null;
   if(allowed&&!baked)for(let i=0;i<p.length;i++){
-   const a=p[i],b=p[(i+1)%p.length],len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(len<3.8)continue;
+   if(h.source.facade&&i!==h.source.facade.frontEdge)continue;const a=p[i],b=p[(i+1)%p.length],len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(len<3.8)continue;
    const ux=(b[0]-a[0])/len,uz=(b[1]-a[1])/len,nx=-uz*sign,nz=ux*sign;
-   for(const fraction of [.5,.3,.7]){const t=len*fraction;if(t<1.4||len-t<1.4)continue;const x=a[0]+ux*t,z=a[1]+uz*t;
+   for(const fraction of h.source.facade?[h.source.facade.doorFraction]:[.5,.3,.7]){const t=len*fraction;const margin=h.source.facade?1:1.4;if(t<margin||len-t<margin)continue;const x=a[0]+ux*t,z=a[1]+uz*t;
     if([.7,1.8,3.1].some(d=>!pointInside(x+nx*d,z+nz*d,p)))continue;
     if([.6,1.8,3].some(d=>occupied(x-nx*d,z-nz*d,h)))continue;
     const neighbors=near(grid,x,z,4);
     if([-1,-.5,0,.5,1,2,3].some(v=>{const q=[x+nx*v,z+nz*v];return neighbors.some(other=>other.poly.some((a,j)=>!(other===h&&j===i)&&segmentDistance(...q,a,other.poly[(j+1)%other.poly.length])<.72))}))continue;
     const roads=near(roadGrid,x,z,90);if(!roads.length)continue;const score=Math.min(...roads.map(r=>segmentDistance(x,z,r.a,r.b)));if(score>65)continue;
-    if(!best||score<best.score)best={x,z,ux,uz,nx,nz,edge:i,t,len,width:1.9,score};
+    if(!best||score<best.score)best={x,z,ux,uz,nx,nz,edge:i,t,len,width:h.source.facade?.doorWidth||1.9,score};
    }
   }
   if(best){h.door=best;h.enterable=true;h.point=(u,v)=>[best.x+best.ux*u+best.nx*v,best.z+best.uz*u+best.nz*v];h.local=(x,z)=>[(x-best.x)*best.ux+(z-best.z)*best.uz,(x-best.x)*best.nx+(z-best.z)*best.nz];
@@ -50,6 +51,7 @@ export function createHousing(data){
   for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];if(best&&i===best.edge){const left=[best.x-best.ux*best.width/2,best.z-best.uz*best.width/2],right=[best.x+best.ux*best.width/2,best.z+best.uz*best.width/2];h.segments.push({a,b:left},{a:right,b})}else h.segments.push({a,b})}
  }
  let model;
+ for(const h of houses)h.neighbors=near(grid,h.x,h.z,Math.hypot(h.w,h.d)+2).filter(n=>n!==h);
  const isOpen=h=>!!doors[h.id];
  function setDoors(value){doors=value||{}}
  function insideHouse(x,z){return near(grid,x,z,0).find(h=>h.enterable&&pointInside(x,z,h.poly))||null}

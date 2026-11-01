@@ -12,6 +12,10 @@ Téléchargez `DeadHorizon.exe`, ouvrez le lanceur, connectez-vous à votre comp
 
 Le lanceur Windows x64 embarque .NET et les fichiers du jeu. Il utilise le composant Microsoft WebView2 Evergreen, déjà installé sur la plupart des PC Windows récents. Le lien officiel pour l’installer si nécessaire : https://developer.microsoft.com/microsoft-edge/webview2/.
 
+## Rendu et façades 5.5
+
+Connexion : hauteur et caméra stabilisées pendant l’attente du serveur. Corps au sol alignés à leur étage. Les murs mitoyens ne génèrent plus de fenêtres vers les maisons voisines. Première passe Street View sur une façade de référence (vitrine et porte noires, lucarnes) et un garage voisin ; le reste de la ville garde des façades approximatives.
+
 ## Carte et travaux 5.4
 
 Les bâtiments utilisent les empreintes OpenStreetMap, complétées par les hauteurs et niveaux IGN BD TOPO et un contrôle cadastral. 68 petites annexes confirmées ont été ajoutées. Les façades, toitures non mesurées et intérieurs sont des approximations ; il ne s’agit pas d’un relevé architectural intégral.

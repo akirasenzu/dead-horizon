@@ -29,20 +29,20 @@ export function createHousingView(scene,housing){
  for(const h of housing.houses){if(!h.enterable)continue;h.renderId=++renderId;const id=h.renderId,height=h.source.h,style=buildingStyle(h),color=style.color,walls=outFor(h,style.plaster?'plaster':'wall'),roof=outFor(h,'roof'),detail=outFor(h,'detail'),glass=outFor(h,'glass');
   const edges=facadeEdges(h),wall=(a,b,y0,y1,col=color)=>quad(walls,[a[0],y0,a[1]],[b[0],y0,b[1]],[b[0],y1,b[1]],[a[0],y1,a[1]],col,id,3);
   for(const p of facadePanels(h)){const a=p.edge.point(p.left,0),b=p.edge.point(p.right,0);wall([a[0],a[2]],[b[0],b[2]],p.bottom,p.top)}
-  for(const e of edges){const point=(t,y,off=.035)=>e.point(t,y,off);quad(detail,point(0,0),point(e.length,0),point(e.length,.32),point(0,.32),0x777a70,id);quad(detail,point(0,height-.22),point(e.length,height-.22),point(e.length,height),point(0,height),0xb5af9f,id);if(!style.plaster)for(let y=STOREY_HEIGHT;y<height-.8;y+=STOREY_HEIGHT)quad(detail,point(0,y-.045),point(e.length,y-.045),point(e.length,y+.045),point(0,y+.045),0xa89f8e,id)}
-  for(const w of facadeOpenings(h)){const e=edges[w.edge],p=(t,y,off=.038)=>e.point(t,y,off),c=style.frame;
+  for(const e of edges){const edgeHeight=h.source.facade&&e.index===h.source.facade.frontEdge&&h.source.facade.frontEave?h.source.facade.frontEave:height;const point=(t,y,off=.035)=>e.point(t,y,off);quad(detail,point(0,0),point(e.length,0),point(e.length,.32),point(0,.32),0x777a70,id);quad(detail,point(0,edgeHeight-.22),point(e.length,edgeHeight-.22),point(e.length,edgeHeight),point(0,edgeHeight),0xb5af9f,id);if(!style.plaster)for(let y=STOREY_HEIGHT;y<edgeHeight-.8;y+=STOREY_HEIGHT)quad(detail,point(0,y-.045),point(e.length,y-.045),point(e.length,y+.045),point(0,y+.045),0xa89f8e,id)}
+  for(const w of facadeOpenings(h)){const e=edges[w.edge],p=(t,y,off=.038)=>e.point(t,y,off),c=style.frame;if(w.garage){quad(detail,p(w.left,w.bottom),p(w.right,w.bottom),p(w.right,w.top),p(w.left,w.top),0xd5d2b8,id);continue}
    for(const side of[-1,1]){const t=w.t+side*(w.w/2+.055);quad(detail,p(t-.055,w.bottom-.1),p(t+.055,w.bottom-.1),p(t+.055,w.top+.1),p(t-.055,w.top+.1),c,id)}
    for(const y of[w.bottom-.055,w.top+.055])quad(detail,p(w.left-.1,y-.055),p(w.right+.1,y-.055),p(w.right+.1,y+.055),p(w.left-.1,y+.055),c,id);
    quad(glass,p(w.left,w.bottom,-.012),p(w.right,w.bottom,-.012),p(w.right,w.top,-.012),p(w.left,w.top,-.012),0x789293,id);
-   quad(detail,p(w.t-.026,w.bottom,.02),p(w.t+.026,w.bottom,.02),p(w.t+.026,w.top,.02),p(w.t-.026,w.top,.02),c,id);
+   if(!w.storefront)quad(detail,p(w.t-.026,w.bottom,.02),p(w.t+.026,w.bottom,.02),p(w.t+.026,w.top,.02),p(w.t-.026,w.top,.02),c,id);
   }
-  const d=h.door,face=(u,y,v)=>{const p=h.point(u,v);return[p[0],y,p[1]]};for(const u of[-d.width/2-.1,d.width/2+.1])quad(detail,face(u-.08,0,-.03),face(u+.08,0,-.03),face(u+.08,2.7,-.03),face(u-.08,2.7,-.03),0xc7bba0,id);
-  const surface=roofSurfaces(h);if(surface){for(const poly of surface.polygons)for(const indices of T.ShapeUtils.triangulateShape(poly.map(p=>new T.Vector2(...p)),[])){const q=indices.map(i=>[poly[i][0],surface.height(poly[i]),poly[i][1]]);tri(roof,...q,style.roof,id,q.map(p=>[p[0]/2.6,p[2]/2.6]))}for(const e of surface.edges){const a=e.a,b=e.b,top=Math.min(surface.height(a),surface.height(b));if(top>height+.001)wall(a,b,height,top);const ya=surface.height(a),yb=surface.height(b);if(Math.abs(ya-yb)>.001)tri(walls,[a[0],Math.min(ya,yb),a[1]],[b[0],Math.min(ya,yb),b[1]],ya>yb?[a[0],ya,a[1]]:[b[0],yb,b[1]],color,id)}}else polygon(roof,h.poly,height,0x8b9497,id);
+  const d=h.door,face=(u,y,v)=>{const p=h.point(u,v);return[p[0],y,p[1]]};for(const u of[-d.width/2-.1,d.width/2+.1])quad(detail,face(u-.08,0,-.03),face(u+.08,0,-.03),face(u+.08,2.7,-.03),face(u-.08,2.7,-.03),h.source.facade?style.frame:0xc7bba0,id);
+  const surface=roofSurfaces(h);if(surface){for(const poly of surface.polygons)for(const indices of T.ShapeUtils.triangulateShape(poly.map(p=>new T.Vector2(...p)),[])){const q=indices.map(i=>[poly[i][0],surface.height(poly[i]),poly[i][1]]);tri(roof,...q,style.roof,id,q.map(surface.uv))}for(const e of surface.edges){const a=e.a,b=e.b,top=Math.min(surface.height(a),surface.height(b));if(top>height+.001)wall(a,b,height,top);const ya=surface.height(a),yb=surface.height(b);if(Math.abs(ya-yb)>.001)tri(walls,[a[0],Math.min(ya,yb),a[1]],[b[0],Math.min(ya,yb),b[1]],ya>yb?[a[0],ya,a[1]]:[b[0],yb,b[1]],color,id)}}else polygon(roof,h.poly,height,0x8b9497,id);
  }
 
  for(const {out,kind}of sectors.values()){const m=makeMesh(out,kind==='wall'?wallMat:kind==='plaster'?plasterMat:kind==='roof'?roofMat:kind==='glass'?glassMat:plainMat);root.add(m);sectorMeshes.push(m)}sectors.clear();
  const workView=createConstructionView(scene,housing);let removedSignature='';
- const loaded=new Map(),doorMaterial=new T.MeshStandardMaterial({color:0x345048,roughness:.75}),handleMaterial=new T.MeshStandardMaterial({color:0xc8b07a,metalness:.5,roughness:.4});
+ const blackDoorMaterial=new T.MeshStandardMaterial({color:0x242622,roughness:.65});const loaded=new Map(),doorMaterial=new T.MeshStandardMaterial({color:0x345048,roughness:.75}),handleMaterial=new T.MeshStandardMaterial({color:0xc8b07a,metalness:.5,roughness:.4});
  const boxGeometry=new T.BoxGeometry(1,1,1);
  function interior(h){
   const g=new T.Group(),out=buffer(),floors=buffer(),ceilings=[],groups=[],id=h.renderId;root.add(g);g.add(buildNearFacade(h,plainMat));
@@ -73,7 +73,7 @@ export function createHousingView(scene,housing){
    }
   }
   g.add(makeMesh(floors,floorMat),makeMesh(out,plainMat));
-  const d=h.door,pivot=new T.Group();pivot.position.set(d.x-d.ux*d.width/2,0,d.z-d.uz*d.width/2);pivot.rotation.y=Math.atan2(-d.uz,d.ux);g.add(pivot);const leafBatch=new ModelBatch(),handleBatch=new ModelBatch();leafBatch.box(d.width,2.58,.1,0xffffff,d.width/2,1.29,0);for(const y of[.58,1.58])leafBatch.box(d.width*.7,.7,.04,0xffffff,d.width/2,y,-.07);handleBatch.box(.32,.065,.03,0xffffff,d.width/2,1.13,-.08);handleBatch.box(.15,.06,.18,0xffffff,d.width-.18,1.1,0);pivot.add(leafBatch.mesh(doorMaterial),handleBatch.mesh(handleMaterial));g.updateMatrixWorld(true);return{h,g,pivot,ceilings,baseAngle:pivot.rotation.y,stamp:0};
+  const d=h.door,pivot=new T.Group();pivot.position.set(d.x-d.ux*d.width/2,0,d.z-d.uz*d.width/2);pivot.rotation.y=Math.atan2(-d.uz,d.ux);g.add(pivot);const leafBatch=new ModelBatch(),handleBatch=new ModelBatch();leafBatch.box(d.width,2.58,.1,0xffffff,d.width/2,1.29,0);for(const y of[.58,1.58])leafBatch.box(d.width*.7,.7,.04,0xffffff,d.width/2,y,-.07);handleBatch.box(.32,.065,.03,0xffffff,d.width/2,1.13,-.08);handleBatch.box(.15,.06,.18,0xffffff,d.width-.18,1.1,0);pivot.add(leafBatch.mesh(h.source.facade?blackDoorMaterial:doorMaterial),handleBatch.mesh(handleMaterial));g.updateMatrixWorld(true);return{h,g,pivot,ceilings,baseAngle:pivot.rotation.y,stamp:0};
  }
  let last=-Infinity,current=null,doorHealth={};
  function update(position,third,now,actor={}){

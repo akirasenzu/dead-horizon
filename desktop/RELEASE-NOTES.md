@@ -1,3 +1,12 @@
+# Dead Horizon PC — Rendu et façades 5.5
+
+- Correction de la hauteur du personnage pendant l’attente de connexion et remise en place de la caméra à l’arrivée du serveur.
+- Corps des infectés relevés selon leur géométrie pour rester entièrement au-dessus du sol, y compris aux étages.
+- Fenêtres supprimées sur les murs mitoyens ; celles d’un étage dépassant une annexe basse restent visibles.
+- Première façade de référence blanche avec vitrine et porte noires, deux lucarnes et toiture à pans brisés. Porte de garage voisine repositionnée. Modélisation originale d’après une référence Street View de 2022 ; les autres façades restent approximatives.
+- Suppression de la phrase « Pas un code de salon » sur le site et la page GitHub.
+- Mise à jour automatique du client ; personnages et inventaires conservés.
+
 # Dead Horizon PC — Carte et travaux 5.4
 
 - Bâtiments recoupés avec IGN BD TOPO et le cadastre : 10 864 hauteurs exploitables, 7 716 indications de niveaux et 68 petites annexes ajoutées. Les données non vérifiées restent estimées.
