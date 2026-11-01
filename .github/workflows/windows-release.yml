@@ -30,8 +30,8 @@ jobs:
           $PSNativeCommandUseErrorActionPreference=$true
           npm install --global pnpm@11.25.0
           pnpm install --frozen-lockfile
-          pnpm test
           pnpm build
+          pnpm test
       - name: Vérifier les mises à jour automatiques
         run: dotnet run --project test/updater/Updater.Tests.csproj -c Release
       - name: Construire le lanceur Windows
